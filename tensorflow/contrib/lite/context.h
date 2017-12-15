@@ -32,6 +32,7 @@ limitations under the License.
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -269,6 +270,8 @@ typedef struct {
   // created by calling `interpreter.ModifyGraphWithDelegate`.
   // WARNING: This is an experimental interface that is subject to change.
   TfLiteDelegate* delegate;
+
+  struct timeval start_time, finish_time;
 } TfLiteNode;
 
 typedef struct TfLiteContext {

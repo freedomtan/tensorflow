@@ -324,6 +324,10 @@ class Interpreter {
   // pointers to existing tensors.
   static constexpr int kTensorsCapacityHeadroom = 16;
 
+  bool GetProfiling() { return profiling_; }
+  // Enable or disable the profiling
+  void SetProfiling(bool enable) { profiling_ = enable;}
+
  private:
   // Give 'op_reg' a chance to initialize itself using the contents of
   // 'buffer'.
@@ -514,6 +518,9 @@ class Interpreter {
   std::unique_ptr<NNAPIDelegate> nnapi_delegate_;
 
   std::unique_ptr<MemoryPlanner> memory_planner_;
+
+  // profiling or not
+  bool profiling_ = false;
 };
 
 }  // namespace tflite
