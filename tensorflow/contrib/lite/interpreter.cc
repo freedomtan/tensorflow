@@ -25,6 +25,7 @@ limitations under the License.
 #include "tensorflow/contrib/lite/kernels/gemm_support.h"
 #include "tensorflow/contrib/lite/memory_planner.h"
 #include "tensorflow/contrib/lite/nnapi_delegate.h"
+#include "tensorflow/contrib/lite/schema/schema_generated.h"
 
 namespace {
 
@@ -279,6 +280,8 @@ TfLiteStatus Interpreter::PrepareOpsAndTensors() {
   return kTfLiteOk;
 }
 
+extern double get_us(struct timeval t);
+
 TfLiteStatus Interpreter::Invoke() {
   if (!consistent_) {
     ReportError(&context_, "Invoke called on model that is not consistent.");
@@ -311,17 +314,24 @@ TfLiteStatus Interpreter::Invoke() {
   // TODO(b/71913981): we should force recalculation in the presence of dynamic
   // tensors, because they may have new value which in turn may affect shapes
   // and allocations.
+  double all_time = 0;
   for (int i = 0; i < nodes_and_registration_.size(); i++) {
     if (i == next_node_to_prepare_) {
       TF_LITE_ENSURE_STATUS(PrepareOpsAndTensors());
       TF_LITE_ENSURE(&context_, next_node_to_prepare_ >= i);
     }
     TfLiteNode& node = nodes_and_registration_[i].first;
+    struct timeval t0, t1;
+    gettimeofday(&t0, NULL);
     const TfLiteRegistration& registration = nodes_and_registration_[i].second;
     if (OpInvoke(registration, &node) == kTfLiteError) {
       status = kTfLiteError;
     }
+    gettimeofday(&t1, NULL);
+    all_time +=  (get_us(t1) - get_us(t0));
+    printf("%010.2f: Node %3d Operator Builtin Code %3d, %s\n", (get_us(t1) - get_us(t0)), i, registration.builtin_code, EnumNameBuiltinOperator((BuiltinOperator)registration.builtin_code));
   }
+  printf("all time: %10.2f\n", all_time);
   return status;
 }
 

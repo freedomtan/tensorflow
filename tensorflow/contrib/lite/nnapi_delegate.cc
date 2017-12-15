@@ -380,13 +380,19 @@ TfLiteStatus NNAPIDelegate::BuildGraph(Interpreter* interpreter) {
   return kTfLiteOk;
 }
 
+double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
+
 TfLiteStatus NNAPIDelegate::Invoke(Interpreter* interpreter) {
+  struct timeval t0, t1, t2, t3;
+
+  gettimeofday(&t0, NULL);
   if (!nn_model_) {
     TF_LITE_ENSURE_STATUS(BuildGraph(interpreter));
   }
 
   ANeuralNetworksExecution* execution = nullptr;
   CHECK_NN(ANeuralNetworksExecution_create(nn_compiled_model_, &execution));
+  gettimeofday(&t1, NULL);
 
   // Currently perform deep copy of input buffer
   for (size_t i = 0; i < interpreter->inputs().size(); i++) {
@@ -404,12 +410,17 @@ TfLiteStatus NNAPIDelegate::Invoke(Interpreter* interpreter) {
     CHECK_NN(ANeuralNetworksExecution_setOutput(
         execution, i, nullptr, tensor->data.raw, tensor->bytes));
   }
+  gettimeofday(&t2, NULL);
   // Currently use blocking compute.
   ANeuralNetworksEvent* event = nullptr;
   CHECK_NN(ANeuralNetworksExecution_startCompute(execution, &event));
   CHECK_NN(ANeuralNetworksEvent_wait(event));
   ANeuralNetworksEvent_free(event);
   ANeuralNetworksExecution_free(execution);
+  gettimeofday(&t3, NULL);
+  printf("t1 - t0 = %f\n", (get_us(t1) - get_us(t0)));
+  printf("t2 - t1 = %f\n", (get_us(t2) - get_us(t1)));
+  printf("t3 - t2 = %f\n", (get_us(t3) - get_us(t2)));
 
 #if 0
   printf("From the NN API:\n");
