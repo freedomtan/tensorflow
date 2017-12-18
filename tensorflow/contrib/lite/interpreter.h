@@ -240,6 +240,10 @@ class Interpreter {
   // Set the number of threads available to the interpreter.
   void SetNumThreads(int num_threads);
 
+  bool GetProfiling() { return profiling_; }
+  // Enable or disable the profiling
+  void SetProfiling(bool enable) { profiling_ = enable;}
+
  private:
   // Give 'op_reg' a chance to initialize itself using the contents of
   // 'buffer'.
@@ -360,6 +364,9 @@ class Interpreter {
   std::unique_ptr<NNAPIDelegate> nnapi_delegate_;
 
   std::unique_ptr<MemoryPlanner> memory_planner_;
+
+  // profiling or not
+  bool profiling_ = false;
 };
 
 }  // namespace tflite

@@ -180,6 +180,9 @@ void RunInference(Settings* s) {
   }
 #endif
   struct timeval start_time, stop_time;
+  if (s->profiling) {
+    interpreter->SetProfiling(true);
+  }
   gettimeofday(&start_time, NULL);
   for (int i = 0; i < s->loop_count; i++) {
     if (interpreter->Invoke() != kTfLiteOk) {

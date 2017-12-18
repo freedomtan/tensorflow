@@ -31,6 +31,7 @@ limitations under the License.
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <sys/time.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -252,6 +253,8 @@ typedef struct {
 
   // Opaque data provided to the node if the node is a builtin.
   void* builtin_data;
+
+  struct timeval start_time, finish_time;
 } TfLiteNode;
 
 typedef struct {

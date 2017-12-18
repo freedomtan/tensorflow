@@ -321,17 +321,23 @@ TfLiteStatus Interpreter::Invoke() {
       TF_LITE_ENSURE(&context_, next_node_to_prepare_ >= i);
     }
     TfLiteNode& node = nodes_and_registration_[i].first;
-    struct timeval t0, t1;
-    gettimeofday(&t0, NULL);
     const TfLiteRegistration& registration = nodes_and_registration_[i].second;
+    if (profiling_) gettimeofday(&node.start_time, NULL);
     if (OpInvoke(registration, &node) == kTfLiteError) {
       status = kTfLiteError;
     }
-    gettimeofday(&t1, NULL);
-    all_time +=  (get_us(t1) - get_us(t0));
-    printf("%010.2f: Node %3d Operator Builtin Code %3d, %s\n", (get_us(t1) - get_us(t0)), i, registration.builtin_code, EnumNameBuiltinOperator((BuiltinOperator)registration.builtin_code));
+    if (profiling_) gettimeofday(&node.finish_time, NULL);
   }
-  printf("all time: %10.2f\n", all_time);
+
+  if (profiling_) {
+    for (int i = 0; i < nodes_and_registration_.size(); i++) {
+      TfLiteNode& node = nodes_and_registration_[i].first;
+      const TfLiteRegistration& registration = nodes_and_registration_[i].second;
+      all_time +=  (get_us(node.finish_time) - get_us(node.start_time));
+      printf("%010.2f: Node %3d Operator Builtin Code %3d, %s\n", (get_us(node.finish_time) - get_us(node.start_time)), i, registration.builtin_code, EnumNameBuiltinOperator((BuiltinOperator)registration.builtin_code));
+    }
+    printf("all time: %10.2f\n", all_time);
+  }
   return status;
 }
 
