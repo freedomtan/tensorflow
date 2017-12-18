@@ -314,7 +314,6 @@ TfLiteStatus Interpreter::Invoke() {
   // TODO(b/71913981): we should force recalculation in the presence of dynamic
   // tensors, because they may have new value which in turn may affect shapes
   // and allocations.
-  double all_time = 0;
   for (int i = 0; i < nodes_and_registration_.size(); i++) {
     if (i == next_node_to_prepare_) {
       TF_LITE_ENSURE_STATUS(PrepareOpsAndTensors());
@@ -330,6 +329,7 @@ TfLiteStatus Interpreter::Invoke() {
   }
 
   if (profiling_) {
+    double all_time = 0;
     for (int i = 0; i < nodes_and_registration_.size(); i++) {
       TfLiteNode& node = nodes_and_registration_[i].first;
       const TfLiteRegistration& registration = nodes_and_registration_[i].second;
