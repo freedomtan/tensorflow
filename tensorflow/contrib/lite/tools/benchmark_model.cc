@@ -93,8 +93,7 @@ void InitImpl(const std::string& graph, const std::vector<int>& sizes,
     LOG(FATAL) << "Failed to invoke tflite!\n";
   }
   gettimeofday(&t1, NULL);
-  LOG(INFO) << "model run successfully"
-            << "\n";
+  LOG(INFO) << "model run successfully\n";
   LOG(INFO) << (get_us(t1) - get_us(t0)) / 1000 << "ms \n";
 
   interpreter->SetProfiling(true);
