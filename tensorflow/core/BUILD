@@ -1437,6 +1437,7 @@ cc_library(
     copts = tf_copts(),
     defines = LIB_INTERNAL_DEFINES,
     linkopts = select({
+        "//tensorflow:android": ["-ldl"],
         "//tensorflow:freebsd": [],
         "//tensorflow:windows": [],
         "//tensorflow:windows_msvc": [],
