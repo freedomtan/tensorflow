@@ -255,6 +255,7 @@ def _rpath_linkopts(name):
   # directory in the tensorflow/ tree.
   levels_to_root = PACKAGE_NAME.count("/") + name.count("/")
   return select({
+      clean_dep("//tensorflow:android"): [],
       clean_dep("//tensorflow:darwin"): [
           "-Wl,%s" % (_make_search_paths("@loader_path", levels_to_root),),
       ],
