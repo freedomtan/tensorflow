@@ -243,6 +243,7 @@ void display_usage() {
             << "--input_std, -s: input standard deviation\n"
             << "--image, -i: image_name.bmp\n"
             << "--labels, -l: labels for the model\n"
+            << "--profiling, -p: per tflite op profiling\n"
             << "--tflite_model, -m: model_name.tflite\n"
             << "--threads, -t: number of threads\n"
             << "--verbose, -v: [0|1] print more information\n"
