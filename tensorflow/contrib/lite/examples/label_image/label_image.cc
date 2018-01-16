@@ -199,7 +199,7 @@ void RunInference(Settings* s) {
             << " ms \n";
 
   const int output_size = 1000;
-  const size_t num_results = 5;
+  const size_t num_results = s->number_of_results;
   const float threshold = 0.001f;
 
   std::vector<std::pair<float, int>> top_results;
@@ -243,6 +243,7 @@ void display_usage() {
             << "--input_std, -s: input standard deviation\n"
             << "--image, -i: image_name.bmp\n"
             << "--labels, -l: labels for the model\n"
+            << "--top_n, -n: max number of results\n"
             << "--profiling, -p: per tflite op profiling\n"
             << "--tflite_model, -m: model_name.tflite\n"
             << "--threads, -t: number of threads\n"
@@ -262,6 +263,7 @@ int Main(int argc, char** argv) {
         {"image", required_argument, 0, 'i'},
         {"labels", required_argument, 0, 'l'},
         {"tflite_model", required_argument, 0, 'm'},
+        {"top_n", required_argument, 0, 'n'},
         {"profiling", required_argument, 0, 'p'},
         {"threads", required_argument, 0, 't'},
         {"input_mean", required_argument, 0, 'b'},
@@ -271,7 +273,7 @@ int Main(int argc, char** argv) {
     /* getopt_long stores the option index here. */
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:b:c:f:i:l:m:p:s:t:v:", long_options,
+    c = getopt_long(argc, argv, "a:b:c:f:i:l:m:n:p:s:t:v:", long_options,
                     &option_index);
 
     /* Detect the end of the options. */
@@ -297,6 +299,9 @@ int Main(int argc, char** argv) {
         break;
       case 'm':
         s.model_name = optarg;
+        break;
+      case 'n':
+        s.number_of_results = strtol(optarg, (char**)NULL, 10);
         break;
       case 'p':
         s.profiling = strtol(optarg, (char**)NULL, 10);
