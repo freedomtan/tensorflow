@@ -112,12 +112,22 @@ void RunInference(Settings* s) {
 
     int t_size = interpreter->tensors_size();
     for (int i = 0; i < t_size; i++) {
-      if (interpreter->tensor(i)->name)
+      if (interpreter->tensor(i)->name) {
         LOG(INFO) << i << ": " << interpreter->tensor(i)->name << ", "
+                  << "(";
+        for (int j = 0; j < interpreter->tensor(i)->dims->size; j++) {
+          if (j < (interpreter->tensor(i)->dims->size - 1))
+            LOG(INFO) << interpreter->tensor(i)->dims->data[j] << ", ";
+          else
+            LOG(INFO) << interpreter->tensor(i)->dims->data[j];
+        }
+        LOG(INFO) << "), "
                   << interpreter->tensor(i)->bytes << ", "
                   << interpreter->tensor(i)->type << ", "
                   << interpreter->tensor(i)->params.scale << ", "
                   << interpreter->tensor(i)->params.zero_point << "\n";
+
+      }
     }
   }
 
