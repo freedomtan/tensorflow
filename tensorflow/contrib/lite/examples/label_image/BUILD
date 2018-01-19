@@ -63,6 +63,26 @@ cc_library(
 #     ],
 # )
 
+tf_cc_binary(
+    name = "test_simple",
+    srcs = [
+        "test_simple.cc",
+    ],
+    linkopts = tflite_linkopts() + select({
+        "//tensorflow:android": [
+            "-pie",  # Android 5.0 and later supports only PIE
+            "-lm",  # some builtin ops, e.g., tanh, need -lm
+            "-llog",
+        ],
+        "//conditions:default": [],
+    }),
+    deps = [
+        "//tensorflow/contrib/lite:framework",
+        "//tensorflow/contrib/lite:string_util",
+        "//tensorflow/contrib/lite/kernels:builtin_ops",
+    ],
+)
+
 filegroup(
     name = "all_files",
     srcs = glob(

@@ -41,6 +41,7 @@ def tflite_linkopts_unstripped():
      a select object with proper linkopts
   """
   return select({
+      "//tensorflow:darwin": [],
       "//tensorflow:android": [
           "-Wl,--no-export-dynamic", # Only inc syms referenced by dynamic obj.
           "-Wl,--exclude-libs,ALL",  # Exclude syms in all libs from auto export.
