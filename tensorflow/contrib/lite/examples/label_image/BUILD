@@ -43,7 +43,12 @@ cc_library(
         "bitmap_helpers_impl.h",
         "label_image.h",
     ],
-    deps = ["//tensorflow/contrib/lite:string"],
+    deps = [
+        "//tensorflow/contrib/lite:string",
+        "//tensorflow/contrib/lite:framework",
+        "//tensorflow/contrib/lite:string_util",
+        "//tensorflow/contrib/lite/kernels:builtin_ops",
+    ],
 )
 
 # TODO(ahentz): Test disabled as it has a memory leek from read_bmp
@@ -77,6 +82,7 @@ tf_cc_binary(
         "//conditions:default": [],
     }),
     deps = [
+        ":bitmap_helpers",
         "//tensorflow/contrib/lite:framework",
         "//tensorflow/contrib/lite:string_util",
         "//tensorflow/contrib/lite/kernels:builtin_ops",
