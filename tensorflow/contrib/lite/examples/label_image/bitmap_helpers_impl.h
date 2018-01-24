@@ -62,7 +62,7 @@ void downsize(T* out, uint8_t* in, int image_height, int image_width,
               int image_channels, int wanted_height, int wanted_width,
               int wanted_channels, Settings* s) {
 
-  int fd = open("/tmp/in.rgb", O_CREAT|O_RDWR); 
+  int fd = open("/tmp/in.rgb", O_CREAT|O_RDWR, 0755); 
   write(fd, in, image_height*image_width*image_channels);
   close(fd);
 
@@ -98,8 +98,11 @@ void downsize(T* out, uint8_t* in, int image_height, int image_width,
   printf("%d, %d, %d, %d\n", dims->data[0], dims->data[1], dims->data[2], dims->data[3]);
 
   bar->AllocateTensors();
-  bar->typed_tensor<float*>(0)[0] = fin;
-  bar->UseNNAPI(true);
+  auto myin = bar->typed_tensor<float>(0);
+  myin = fin;
+  bar->UseNNAPI(false);
+  printf("i: %f, %f, %f\n", myin[0], myin[1], myin[2]);
+  printf("i: %f, %f, %f\n", myin[0], myin[1], myin[2]);
 
   bar->Invoke();
 
@@ -107,9 +110,12 @@ void downsize(T* out, uint8_t* in, int image_height, int image_width,
   dims = bar->tensor(1)->dims;
   printf("%d, %d, %d, %d\n", dims->data[0], dims->data[1], dims->data[2], dims->data[3]);
 
-  float *output = bar->typed_tensor<float*>(1)[0];
+  float *output = bar->typed_tensor<float>(1);
+  printf("output: %p\n", output);
+  printf("output: %f\n", *output);
   printf("o: %f, %f, %f\n", output[0], output[1], output[2]);
 
+#if 0
   for (int i=0; i < 224 * 224 * 3; i++) {
     if (s->input_floating)
       out[i] = (output[i] - s->input_mean) / s->input_std;
@@ -123,9 +129,10 @@ void downsize(T* out, uint8_t* in, int image_height, int image_width,
     printf("o: %d, %d, %d\n", out[0+224*3], out[1+224*3], out[2+224*3]);
     printf("o: %d, %d, %d\n", out[224*224*3-3], out[224*224*3-2], out[224*224*3-1]);
   }
-  fd = open("/tmp/foo.rgb", O_CREAT|O_RDWR); 
+  fd = open("/tmp/foo.rgb", O_CREAT|O_RDWR, 0755); 
   printf("len = %zu, %lu\n", bar->tensor(1)->bytes, bar->tensor(1)->bytes/4);
   write(fd, out, bar->tensor(1)->bytes/4);
+#endif
 }
 
 }  // namespace label_image

@@ -189,6 +189,8 @@ void InitImpl(const std::string& graph, const std::vector<int>& sizes,
   LOG(INFO) << "output: " << o[0] << "\n";
 
   label_image::Settings s;
+  s.input_bmp_name = "/tmp/grace_hopper.bmp";
+  
   int image_width = 224;
   int image_height = 224;
   int image_channels = 3;
@@ -219,9 +221,16 @@ void InitImpl(const std::string& graph, const std::vector<int>& sizes,
   TfLiteResizeBilinearParams wh = {224, 224};;
   bar->AddNodeWithParameters({0}, {1}, nullptr, 0, &wh, resize, nullptr);
 
+  LOG(INFO) << "tensors: " << bar->tensors_size() << "\n";
   bar->AllocateTensors();
-  bar->typed_tensor<float*>(0)[0] = fin;
+  LOG(INFO) << "tensors: " << bar->tensors_size() << "\n";
+  // bar->typed_tensor<float*>(0)[0] = fin;
+  o = bar->typed_tensor<float>(0);
+  LOG(INFO) << "f = " << o << "\n"; 
+  o = fin;
+  LOG(INFO) << "before Invoke() tensors: " << bar->tensors_size() << "\n";
   bar->Invoke();
+  LOG(INFO) << "after Invoke() tensors: " << bar->tensors_size() << "\n";
 }
 
 int Main(int argc, char** argv) {
