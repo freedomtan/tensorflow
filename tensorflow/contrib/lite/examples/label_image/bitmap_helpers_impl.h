@@ -21,14 +21,6 @@ limitations under the License.
 #include "tensorflow/contrib/lite/kernels/register.h"
 #include "tensorflow/contrib/lite/string_util.h"
 #include "tensorflow/contrib/lite/version.h"
-#include "tensorflow/contrib/lite/model.h"
-
-#include <fcntl.h>      // NOLINT(build/include_order)
-#include <getopt.h>     // NOLINT(build/include_order)
-#include <sys/time.h>   // NOLINT(build/include_order)
-#include <sys/types.h>  // NOLINT(build/include_order)
-#include <sys/uio.h>    // NOLINT(build/include_order)
-#include <unistd.h>     // NOLINT(build/include_order)
 
 #include "tensorflow/contrib/lite/examples/label_image/label_image.h"
 
@@ -36,103 +28,56 @@ namespace tflite {
 namespace label_image {
 
 template <class T>
-void downsize_old(T* out, uint8_t* in, int image_height, int image_width,
-              int image_channels, int wanted_height, int wanted_width,
-              int wanted_channels, Settings* s) {
-  for (int y = 0; y < wanted_height; ++y) {
-    const int in_y = (y * image_height) / wanted_height;
-    uint8_t* in_row = in + (in_y * image_width * image_channels);
-    T* out_row = out + (y * wanted_width * wanted_channels);
-    for (int x = 0; x < wanted_width; ++x) {
-      const int in_x = (x * image_width) / wanted_width;
-      uint8_t* in_pixel = in_row + (in_x * image_channels);
-      T* out_pixel = out_row + (x * wanted_channels);
-      for (int c = 0; c < wanted_channels; ++c) {
-        if (s->input_floating)
-          out_pixel[c] = (in_pixel[c] - s->input_mean) / s->input_std;
-        else
-          out_pixel[c] = in_pixel[c];
-      }
-    }
-  }
-}
+void resize(T* out, uint8_t* in, int image_height, int image_width,
+            int image_channels, int wanted_height, int wanted_width,
+            int wanted_channels, Settings* s) {
 
-template <class T>
-void downsize(T* out, uint8_t* in, int image_height, int image_width,
-              int image_channels, int wanted_height, int wanted_width,
-              int wanted_channels, Settings* s) {
+  int number_of_pixels = image_height * image_width * image_channels;
 
-  int fd = open("/tmp/in.rgb", O_CREAT|O_RDWR, 0755); 
-  write(fd, in, image_height*image_width*image_channels);
-  close(fd);
-
-  float *fin = new float[image_height * image_width * image_channels];
-
-  for (int i=0; i < image_height * image_width * image_channels; i++)
-    fin[i] = in[i];
-
-  tflite::Interpreter *bar = new Interpreter();
+  tflite::Interpreter *interpreter = new Interpreter();
   int base_index = 0;
 
-  // one input
-  bar->AddTensors(1, &base_index);
+  // two inputs: input and new_sizes
+  interpreter->AddTensors(2, &base_index);
   // one output
-  bar->AddTensors(1, &base_index);
-  // LOG(INFO) << "tensors: " << bar->tensors_size() << "\n";
-  bar->SetInputs({0});
-  bar->SetOutputs({1});
+  interpreter->AddTensors(1, &base_index);
+  // set input and output tensors
+  interpreter->SetInputs({0, 1});
+  interpreter->SetOutputs({2});
 
+  // set paramters of tensors
   TfLiteQuantizationParams quant;
-
-  bar->SetTensorParametersReadWrite(0, kTfLiteFloat32, "input", {1, image_height, image_width, image_channels}, quant);
-  bar->SetTensorParametersReadWrite(1, kTfLiteFloat32, "output", {1, wanted_height, wanted_width, wanted_channels}, quant);
+  interpreter->SetTensorParametersReadWrite(0, kTfLiteFloat32, "input", {1, image_height, image_width, image_channels}, quant);
+  interpreter->SetTensorParametersReadWrite(1, kTfLiteInt32, "new_size", {2}, quant);
+  interpreter->SetTensorParametersReadWrite(2, kTfLiteFloat32, "output", {1, wanted_height, wanted_width, wanted_channels}, quant);
 
   tflite::ops::builtin::BuiltinOpResolver resolver;
   TfLiteRegistration *resize = resolver.FindOp(BuiltinOperator_RESIZE_BILINEAR);
-  TfLiteResizeBilinearParams wh = {wanted_height, wanted_width};
-  printf("%d, %d\n", wh.new_height, wh.new_width);
-  bar->AddNodeWithParameters({0}, {1}, nullptr, 0, &wh, resize, nullptr);
+  interpreter->AddNodeWithParameters({0,1}, {2}, nullptr, 0, nullptr, resize, nullptr);
 
-  TfLiteIntArray* dims = bar->tensor(1)->dims;
-  printf("%s: %d, %d\n", bar->tensor(1)->name, bar->tensor(1)->bytes, bar->tensor(1)->dims->size);
-  printf("%d, %d, %d, %d\n", dims->data[0], dims->data[1], dims->data[2], dims->data[3]);
+  interpreter->AllocateTensors();
 
-  bar->AllocateTensors();
-  auto myin = bar->typed_tensor<float>(0);
-  myin = fin;
-  bar->UseNNAPI(false);
-  printf("i: %f, %f, %f\n", myin[0], myin[1], myin[2]);
-  printf("i: %f, %f, %f\n", myin[0], myin[1], myin[2]);
+  // fill input image
+  // in[] are integers, cannot do memcpy() directly
+  auto input = interpreter->typed_tensor<float>(0);
+  for (int i=0; i < number_of_pixels; i++)
+    input[i] = in[i];
 
-  bar->Invoke();
+  // fill new_sizes
+  interpreter->typed_tensor<int>(1)[0] = wanted_height;
+  interpreter->typed_tensor<int>(1)[1] = wanted_width;
 
-  printf("%s: %d, %d\n", bar->tensor(1)->name, bar->tensor(1)->bytes, bar->tensor(1)->dims->size);
-  dims = bar->tensor(1)->dims;
-  printf("%d, %d, %d, %d\n", dims->data[0], dims->data[1], dims->data[2], dims->data[3]);
+  interpreter->Invoke();
 
-  float *output = bar->typed_tensor<float>(1);
-  printf("output: %p\n", output);
-  printf("output: %f\n", *output);
-  printf("o: %f, %f, %f\n", output[0], output[1], output[2]);
+  auto output = interpreter->typed_tensor<float>(2);
+  auto output_number_of_pixels = wanted_height * wanted_height * wanted_channels;
 
-#if 0
-  for (int i=0; i < 224 * 224 * 3; i++) {
+  for (int i=0; i < output_number_of_pixels; i++) {
     if (s->input_floating)
       out[i] = (output[i] - s->input_mean) / s->input_std;
     else
       out[i] = (uint8_t)output[i];
   }
-  if (s->input_floating)
-    printf("o: %f, %f, %f\n", out[0], out[1], out[2]);
-  else  {
-    printf("o: %d, %d, %d\n", out[0], out[1], out[2]);
-    printf("o: %d, %d, %d\n", out[0+224*3], out[1+224*3], out[2+224*3]);
-    printf("o: %d, %d, %d\n", out[224*224*3-3], out[224*224*3-2], out[224*224*3-1]);
-  }
-  fd = open("/tmp/foo.rgb", O_CREAT|O_RDWR, 0755); 
-  printf("len = %zu, %lu\n", bar->tensor(1)->bytes, bar->tensor(1)->bytes/4);
-  write(fd, out, bar->tensor(1)->bytes/4);
-#endif
 }
 
 }  // namespace label_image

@@ -206,31 +206,36 @@ void InitImpl(const std::string& graph, const std::vector<int>& sizes,
   base_index = 0;
 
   // one input
-  bar->AddTensors(1, &base_index);
+  bar->AddTensors(2, &base_index);
   // one output
   bar->AddTensors(1, &base_index);
   LOG(INFO) << "tensors: " << bar->tensors_size() << "\n";
-  bar->SetInputs({0});
-  bar->SetOutputs({1});
+  bar->SetInputs({0, 1});
+  bar->SetOutputs({2});
 
   bar->SetTensorParametersReadWrite(0, kTfLiteFloat32, "input", {1, image_width, image_height, image_channels}, quant);
-  bar->SetTensorParametersReadWrite(1, kTfLiteFloat32, "output", {1, 224, 224, image_channels}, quant);
+  bar->SetTensorParametersReadWrite(1, kTfLiteInt32, "new_size", {2}, quant);
+  bar->SetTensorParametersReadWrite(2, kTfLiteFloat32, "output", {1, 224, 224, image_channels}, quant);
 
   TfLiteRegistration *resize = resolver.FindOp(BuiltinOperator_RESIZE_BILINEAR);
 
   TfLiteResizeBilinearParams wh = {224, 224};;
-  bar->AddNodeWithParameters({0}, {1}, nullptr, 0, &wh, resize, nullptr);
+  bar->AddNodeWithParameters({0, 1}, {2}, nullptr, 0, nullptr, resize, nullptr);
 
   LOG(INFO) << "tensors: " << bar->tensors_size() << "\n";
   bar->AllocateTensors();
   LOG(INFO) << "tensors: " << bar->tensors_size() << "\n";
   // bar->typed_tensor<float*>(0)[0] = fin;
-  o = bar->typed_tensor<float>(0);
+  o = bar->typed_tensor<float>(2);
   LOG(INFO) << "f = " << o << "\n"; 
+  printf("f - %p\n", o);
   o = fin;
   LOG(INFO) << "before Invoke() tensors: " << bar->tensors_size() << "\n";
   bar->Invoke();
   LOG(INFO) << "after Invoke() tensors: " << bar->tensors_size() << "\n";
+  o = bar->typed_tensor<float>(2);
+  LOG(INFO) << "f = " << o << "\n";
+  LOG(INFO) << "f = " << o[0] << "\n";
 }
 
 int Main(int argc, char** argv) {

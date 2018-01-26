@@ -156,15 +156,14 @@ void RunInference(Settings* s) {
   int wanted_channels = dims->data[3];
 
   switch (interpreter->tensor(input)->type) {
-<<<<<<< 39fb273036bb93125fb8d799fc0845c7ddd4b046
     case kTfLiteFloat32:
       s->input_floating = true;
-      downsize<float>(interpreter->typed_tensor<float>(input), in,
+      resize<float>(interpreter->typed_tensor<float>(input), in,
                       image_height, image_width, image_channels,
                       wanted_height, wanted_width, wanted_channels, s);
       break;
     case kTfLiteUInt8:
-      downsize<uint8_t>(interpreter->typed_tensor<uint8_t>(input), in,
+      resize<uint8_t>(interpreter->typed_tensor<uint8_t>(input), in,
                         image_height, image_width, image_channels,
                         wanted_height, wanted_width, wanted_channels, s);
       break;
