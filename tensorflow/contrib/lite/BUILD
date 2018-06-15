@@ -5,6 +5,7 @@ package(default_visibility = [
 licenses(["notice"])  # Apache 2.0
 
 load("//tensorflow/contrib/lite:build_def.bzl", "tflite_copts", "gen_selected_ops")
+load("//tensorflow:tensorflow.bzl", "tf_cc_test")
 
 exports_files(glob([
     "testdata/*.bin",
@@ -43,7 +44,7 @@ cc_library(
     ],
 )
 
-cc_test(
+tf_cc_test(
     name = "arena_planner_test",
     size = "small",
     srcs = ["arena_planner_test.cc"],

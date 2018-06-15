@@ -28,6 +28,8 @@ limitations under the License.
 #include "tensorflow/contrib/lite/kernels/internal/reference/reference_ops.h"
 #include "tensorflow/contrib/lite/kernels/internal/test_util.h"
 
+using namespace std;
+
 namespace tflite {
 namespace {
 

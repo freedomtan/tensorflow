@@ -25,9 +25,14 @@ limitations under the License.
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <string>
+
 #include "tensorflow/contrib/lite/nnapi/NeuralNetworksShim.h"
 #include "tensorflow/contrib/lite/testing/parse_testdata.h"
 #include "tensorflow/contrib/lite/testing/tflite_driver.h"
+#include "tensorflow/contrib/lite/string_util.h"
+
+using namespace std;
 
 string dirname(const string& s) { return s.substr(0, s.find_last_of("/")); }
 

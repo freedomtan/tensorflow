@@ -1,6 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("//tensorflow/contrib/lite:build_def.bzl", "tflite_copts", "gen_selected_ops")
+load("//tensorflow:tensorflow.bzl", "tf_cc_test")
 
 licenses(["notice"])  # Apache 2.0
 
@@ -43,7 +44,7 @@ cc_library(
     ],
 )
 
-cc_test(
+tf_cc_test(
     name = "extract_feature_op_test",
     size = "small",
     srcs = ["ops/extract_feature_test.cc"],
@@ -57,7 +58,7 @@ cc_test(
     ],
 )
 
-cc_test(
+tf_cc_test(
     name = "normalize_op_test",
     size = "small",
     srcs = ["ops/normalize_test.cc"],
@@ -71,7 +72,7 @@ cc_test(
     ],
 )
 
-cc_test(
+tf_cc_test(
     name = "predict_op_test",
     size = "small",
     srcs = ["ops/predict_test.cc"],

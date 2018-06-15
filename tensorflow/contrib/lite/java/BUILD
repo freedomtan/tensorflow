@@ -121,7 +121,6 @@ java_test(
     srcs = ["src/test/java/org/tensorflow/lite/InterpreterTest.java"],
     data = [
         "src/testdata/add.bin",
-        "src/testdata/mobilenet.tflite.bin",
     ],
     javacopts = JAVACOPTS,
     test_class = "org.tensorflow.lite.InterpreterTest",

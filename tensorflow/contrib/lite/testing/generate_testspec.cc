@@ -81,27 +81,27 @@ bool GenerateTestSpecFromTensorflowModel(
   TfDriver runner(input_layer, input_layer_type, input_layer_shape,
                   output_layer);
   if (!runner.IsValid()) {
-    cerr << runner.GetErrorMessage() << endl;
+    std::cerr << runner.GetErrorMessage() << std::endl;
     return false;
   }
 
   runner.LoadModel(tensorflow_model_path);
   if (!runner.IsValid()) {
-    cerr << runner.GetErrorMessage() << endl;
+    std::cerr << runner.GetErrorMessage() << std::endl;
     return false;
   }
 
   for (int i = 0; i < input_values.size(); i++) {
     runner.SetInput(i, input_values[i]);
     if (!runner.IsValid()) {
-      cerr << runner.GetErrorMessage() << endl;
+      std::cerr << runner.GetErrorMessage() << std::endl;
       return false;
     }
   }
 
   runner.Invoke();
   if (!runner.IsValid()) {
-    cerr << runner.GetErrorMessage() << endl;
+    std::cerr << runner.GetErrorMessage() << std::endl;
     return false;
   }
 
@@ -119,7 +119,7 @@ bool GenerateTestSpecFromTensorflowModel(
   for (int i = 0; i < output_layer.size(); i++) {
     stream << "  output: \"" << runner.ReadOutput(i) << "\"\n";
     if (!runner.IsValid()) {
-      cerr << runner.GetErrorMessage() << endl;
+      std::cerr << runner.GetErrorMessage() << std::endl;
       return false;
     }
   }

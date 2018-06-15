@@ -29,7 +29,9 @@ limitations under the License.
 #include <gtest/gtest.h>
 #include "tensorflow/contrib/lite/kernels/internal/optimized/optimized_ops.h"
 #include "tensorflow/contrib/lite/kernels/internal/reference/reference_ops.h"
+#include "tensorflow/contrib/lite/string_util.h"
 
+namespace tflite {
 namespace {
 
 class NumberGenerator {
@@ -331,3 +333,4 @@ TEST_F(LogQuantizedTest, SelectedIntegerBits) {
 }
 
 }  // namespace
+}  // namespace tflite

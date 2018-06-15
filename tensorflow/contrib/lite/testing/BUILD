@@ -148,6 +148,8 @@ cc_test(
     srcs = ["join_test.cc"],
     deps = [
         ":join",
+        "//tensorflow/contrib/lite:string",
+        "//tensorflow/contrib/lite:string_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
@@ -280,6 +282,8 @@ cc_test(
     ],
     deps = [
         ":generate_testspec",
+        "//tensorflow/contrib/lite:framework",
+        "//tensorflow/contrib/lite:string_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
