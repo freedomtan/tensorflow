@@ -579,6 +579,7 @@ cc_test(
         ":quantization_util",
         ":reference_base",
         ":test_util",
+        "//tensorflow/contrib/lite:string_util",
         "@com_google_googletest//:gtest_main",
     ],
 )
