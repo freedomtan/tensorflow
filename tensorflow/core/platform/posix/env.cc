@@ -25,6 +25,10 @@ limitations under the License.
 #include <time.h>
 #include <unistd.h>
 
+#if defined(__FreeBSD__)
+#include <pthread_np.h>
+#endif
+
 #include <thread>
 #include <vector>
 
@@ -113,7 +117,7 @@ class PosixEnv : public Env {
     // Has to be casted to long first, else this error appears:
     // static_cast from 'pthread_t' (aka 'pthread *') to 'int32' (aka 'int')
     // is not allowed
-    return static_cast<int32>(static_cast<int64>(pthread_self()));
+    return pthread_getthreadid_np();
 #else
     return static_cast<int32>(pthread_self());
 #endif
@@ -133,7 +137,12 @@ class PosixEnv : public Env {
     return false;
 #else
     char buf[100];
+#ifdef __FreeBSD__
+    int res = 0;
+    pthread_get_name_np(pthread_self(), buf, static_cast<size_t>(100));
+#else
     int res = pthread_getname_np(pthread_self(), buf, static_cast<size_t>(100));
+#endif
     if (res != 0) {
       return false;
     }
