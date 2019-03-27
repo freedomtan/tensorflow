@@ -7,10 +7,11 @@ ifeq ($(TARGET),rpi)
 
   ifeq ($(TARGET_ARCH), armv7l)
     CXXFLAGS += \
-			-march=armv7-a \
+      -march=armv7-a \
       -mfpu=neon-vfpv4 \
       -funsafe-math-optimizations \
       -ftree-vectorize \
+      -flax-vector-conversions \
       -fPIC
 
     CCFLAGS += \
@@ -18,6 +19,7 @@ ifeq ($(TARGET),rpi)
       -mfpu=neon-vfpv4 \
       -funsafe-math-optimizations \
       -ftree-vectorize \
+      -flax-vector-conversions \
       -fPIC
 
     LDFLAGS := \

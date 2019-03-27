@@ -8,6 +8,20 @@ load("//tensorflow/lite:build_def.bzl", "tflite_copts")
 load("//tensorflow/lite:special_rules.bzl", "tflite_portable_test_suite")
 load("//tensorflow:tensorflow.bzl", "tf_opts_nortti_if_android")
 
+config_setting(
+    name = "aarch64",
+    values = {
+        "cpu": "aarch64",
+    },
+)
+
+config_setting(
+    name = "arm",
+    values = {
+        "cpu": "arm",
+    },
+)
+
 # Suppress warnings that are introduced by Eigen Tensor.
 EXTRA_EIGEN_COPTS = select({
     "//tensorflow:ios": [
@@ -237,7 +251,11 @@ cc_library(
     ],
     hdrs = [
     ],
-    copts = tflite_copts() + tf_opts_nortti_if_android() + EXTRA_EIGEN_COPTS,
+    copts = tflite_copts() + tf_opts_nortti_if_android() + EXTRA_EIGEN_COPTS +
+      select({
+        ":aarch64": ["-flax-vector-conversions"],
+        ":arm": ["-flax-vector-conversions"],
+      }),
     visibility = ["//visibility:private"],
     deps = [
         ":activation_functor",

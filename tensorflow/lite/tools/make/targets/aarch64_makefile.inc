@@ -9,12 +9,14 @@ ifeq ($(TARGET),aarch64)
     -march=armv8-a \
     -funsafe-math-optimizations \
     -ftree-vectorize \
+    -flax-vector-conversions \
     -fPIC
 
   CCFLAGS += \
     -march=armv8-a \
     -funsafe-math-optimizations \
     -ftree-vectorize \
+    -flax-vector-conversions \
     -fPIC
 
   LDFLAGS := \
