@@ -28,6 +28,7 @@ limitations under the License.
 #include "tensorflow/lite/op_resolver.h"
 #include "tensorflow/lite/string_util.h"
 #include "tensorflow/lite/tools/benchmark/logging.h"
+#include "tensorflow/lite/delegates/gpu/gl_delegate.h"
 
 #ifdef GEMMLOWP_PROFILING
 #include "gemmlowp/profiling/profiler.h"
@@ -379,9 +380,22 @@ void BenchmarkTfLiteModel::Init() {
   bool use_nnapi = params_.Get<bool>("use_nnapi");
 
   interpreter->UseNNAPI(use_nnapi);
+  TfLiteGpuDelegateOptions kMyOptions = {
+    .metadata = nullptr,
+    .compile_options = {
+      .precision_loss_allowed = 0,
+      .preferred_gl_object_type = TFLITE_GL_OBJECT_TYPE_FASTEST,
+      .dynamic_batch_enabled = 0,
+    },
+  };
+
   ApplyDelegates();
 
   bool allow_fp16 = params_.Get<bool>("allow_fp16");
+  if (allow_fp16)
+     kMyOptions.compile_options.precision_loss_allowed = 1;
+  auto* delegate = TfLiteGpuDelegateCreate(&kMyOptions);
+  if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
 
   interpreter->SetAllowFp16PrecisionForFp32(allow_fp16);
 
