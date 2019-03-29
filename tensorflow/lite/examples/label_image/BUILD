@@ -30,6 +30,7 @@ cc_binary(
         "//tensorflow/lite:framework",
         "//tensorflow/lite:string_util",
         "//tensorflow/lite/kernels:builtin_ops",
+        "//tensorflow/lite/delegates/gpu:gl_delegate",
     ],
 )
 
@@ -48,6 +49,7 @@ cc_library(
         "//tensorflow/lite:string_util",
         "//tensorflow/lite/kernels:builtin_ops",
         "//tensorflow/lite/schema:schema_fbs",
+        "//tensorflow/lite/delegates/gpu:gl_delegate",
     ],
 )
 

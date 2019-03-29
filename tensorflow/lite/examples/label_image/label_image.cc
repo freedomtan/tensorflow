@@ -153,9 +153,24 @@ void RunInference(Settings* s) {
     LOG(INFO) << "number of outputs: " << outputs.size() << "\n";
   }
 
+  TfLiteGpuDelegateOptions kMyOptions = {
+  .metadata = nullptr,
+  .compile_options = {
+    .precision_loss_allowed = 0,
+    .preferred_gl_object_type = TFLITE_GL_OBJECT_TYPE_FASTEST,
+    .dynamic_batch_enabled = 0,
+  },
+  };
+  if (s->allow_fp16)
+    kMyOptions.compile_options.precision_loss_allowed = 1; 
+
+  auto* delegate = TfLiteGpuDelegateCreate(&kMyOptions);
+  if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
+#if 0
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     LOG(FATAL) << "Failed to allocate tensors!";
   }
+#endif
 
   if (s->verbose) PrintInterpreterState(interpreter.get());
 
