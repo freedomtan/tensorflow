@@ -154,23 +154,25 @@ void RunInference(Settings* s) {
   }
 
   TfLiteGpuDelegateOptions kMyOptions = {
-  .metadata = nullptr,
-  .compile_options = {
-    .precision_loss_allowed = 0,
-    .preferred_gl_object_type = TFLITE_GL_OBJECT_TYPE_FASTEST,
-    .dynamic_batch_enabled = 0,
-  },
+    .metadata = nullptr,
+    .compile_options = {
+      .precision_loss_allowed = 0,
+      .preferred_gl_object_type = TFLITE_GL_OBJECT_TYPE_FASTEST,
+      .dynamic_batch_enabled = 0,
+    },
   };
   if (s->allow_fp16)
     kMyOptions.compile_options.precision_loss_allowed = 1; 
 
-  auto* delegate = TfLiteGpuDelegateCreate(&kMyOptions);
-  if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
-#if 0
-  if (interpreter->AllocateTensors() != kTfLiteOk) {
-    LOG(FATAL) << "Failed to allocate tensors!";
+  TfLiteDelegate* delegate;
+  if (s->gl_backend) {
+    delegate = TfLiteGpuDelegateCreate(&kMyOptions);
+    if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
+  } else {
+    if (interpreter->AllocateTensors() != kTfLiteOk) {
+      LOG(FATAL) << "Failed to allocate tensors!";
+    }
   }
-#endif
 
   if (s->verbose) PrintInterpreterState(interpreter.get());
 
@@ -310,12 +312,13 @@ int Main(int argc, char** argv) {
         {"input_std", required_argument, nullptr, 's'},
         {"num_results", required_argument, nullptr, 'r'},
         {"warmup_runs", required_argument, nullptr, 'w'},
+        {"gl_backend", required_argument, nullptr, 'g'},
         {nullptr, 0, nullptr, 0}};
 
     /* getopt_long stores the option index here. */
     int option_index = 0;
 
-    c = getopt_long(argc, argv, "a:b:c:f:i:l:m:p:r:s:t:v:", long_options,
+    c = getopt_long(argc, argv, "a:b:c:f:g:i:l:m:p:r:s:t:v:w:", long_options,
                     &option_index);
 
     /* Detect the end of the options. */
@@ -334,6 +337,10 @@ int Main(int argc, char** argv) {
         break;
       case 'f':
         s.allow_fp16 =
+            strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
+        break;
+      case 'g':
+        s.gl_backend =
             strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
         break;
       case 'i':
