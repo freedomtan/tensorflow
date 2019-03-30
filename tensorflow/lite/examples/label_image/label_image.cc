@@ -152,7 +152,7 @@ void RunInference(Settings* s) {
     LOG(INFO) << "number of inputs: " << inputs.size() << "\n";
     LOG(INFO) << "number of outputs: " << outputs.size() << "\n";
   }
-
+#if defined(ANDROID) || defined(__ANDROID__)
   TfLiteGpuDelegateOptions kMyOptions = {
     .metadata = nullptr,
     .compile_options = {
@@ -169,10 +169,13 @@ void RunInference(Settings* s) {
     delegate = TfLiteGpuDelegateCreate(&kMyOptions);
     if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
   } else {
+#endif
     if (interpreter->AllocateTensors() != kTfLiteOk) {
       LOG(FATAL) << "Failed to allocate tensors!";
     }
+#if defined(ANDROID) || defined(__ANDROID__)
   }
+#endif
 
   if (s->verbose) PrintInterpreterState(interpreter.get());
 

@@ -30,8 +30,11 @@ cc_binary(
         "//tensorflow/lite:framework",
         "//tensorflow/lite:string_util",
         "//tensorflow/lite/kernels:builtin_ops",
-        "//tensorflow/lite/delegates/gpu:gl_delegate",
-    ],
+    ] + select({
+        "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_library(
@@ -49,8 +52,11 @@ cc_library(
         "//tensorflow/lite:string_util",
         "//tensorflow/lite/kernels:builtin_ops",
         "//tensorflow/lite/schema:schema_fbs",
-        "//tensorflow/lite/delegates/gpu:gl_delegate",
-    ],
+    ] + select({
+        "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//conditions:default": [],
+    }),
 )
 
 cc_test(
