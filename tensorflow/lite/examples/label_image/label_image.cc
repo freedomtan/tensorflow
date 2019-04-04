@@ -283,7 +283,7 @@ void display_usage() {
       << "--accelerated, -a: [0|1], use Android NNAPI or not\n"
       << "--allow_fp16, -f: [0|1], allow running fp32 models with fp16 or not\n"
       << "--count, -c: loop interpreter->Invoke() for certain times\n"
-      << "--gl_backend, -g: use GL GPU Delegate on Android\n",
+      << "--gl_backend, -g: use GL GPU Delegate on Android\n"
       << "--input_mean, -b: input mean\n"
       << "--input_std, -s: input standard deviation\n"
       << "--image, -i: image_name.bmp\n"
