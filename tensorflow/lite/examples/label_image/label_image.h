@@ -20,8 +20,8 @@ limitations under the License.
 #if defined(ANDROID) || defined(__ANDROID__)
 #include "tensorflow/lite/delegates/gpu/gl_delegate.h"
 #endif
-#if defined(MACOS)
-#include "tensorflow/lite/delegates/metal/gl_delegate.h"
+#if defined(__APPLE__)
+#include "tensorflow/lite/delegates/gpu/metal_delegate.h"
 #endif
 
 namespace tflite {

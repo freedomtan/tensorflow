@@ -169,6 +169,7 @@ void RunInference(Settings* s) {
     delegate = TfLiteGpuDelegateCreate(&kMyOptions);
     if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
   } else {
+#elif defined(__APPLE__)
 #endif
     if (interpreter->AllocateTensors() != kTfLiteOk) {
       LOG(FATAL) << "Failed to allocate tensors!";

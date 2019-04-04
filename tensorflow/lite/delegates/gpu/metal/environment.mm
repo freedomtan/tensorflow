@@ -16,7 +16,9 @@ limitations under the License.
 #include "tensorflow/lite/delegates/gpu/metal/environment.h"
 
 #import <Metal/Metal.h>
+#if __IPHONE_AVAILABLE
 #import <UIKit/UIKit.h>
+#endif
 
 #include <utility>
 #include <vector>
@@ -27,10 +29,13 @@ namespace tflite {
 namespace gpu {
 namespace metal {
 
+#if __IPHONE_AVAILABLE
 float GetiOsSystemVersion() { return [[[UIDevice currentDevice] systemVersion] floatValue]; }
+#endif
 
 int GetAppleSocVersion() {
   std::vector<std::pair<MTLFeatureSet, int>> features = {
+#if __IPHONE_AVAILABLE
 #if defined(__IPHONE_8_0) && __IPHONE_OS_VERSION_MIN_REQUIRED >= __IPHONE_8_0
     {MTLFeatureSet_iOS_GPUFamily1_v1, 7},
     {MTLFeatureSet_iOS_GPUFamily2_v1, 8},
@@ -56,6 +61,7 @@ int GetAppleSocVersion() {
     {MTLFeatureSet_iOS_GPUFamily3_v4, 9},
     {MTLFeatureSet_iOS_GPUFamily4_v2, 11},
     {MTLFeatureSet_iOS_GPUFamily5_v1, 12},
+#endif
 #endif
   };
   id<MTLDevice> device = GetBestSupportedMetalDevice();
