@@ -40,7 +40,7 @@ cc_library(
         "//tensorflow:macos": [],
         "//tensorflow:ios": [],
         "//tensorflow:windows": [],
-        "//conditions:default": ["-lrt"],
+        "//conditions:default": [],
     }),
     deps = [
         "//tensorflow/lite/nnapi:nnapi_lib",

@@ -41,6 +41,7 @@ apple_binary(
     name = "label_image_metal",
     platform_type = "macos",
     deps = [":label_image_m"],
+    linkopts = [],
 )
 
 objc_library(

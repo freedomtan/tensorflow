@@ -707,7 +707,6 @@ tf_cc_binary(
         "//conditions:default": [
             "-lm",
             "-lpthread",
-            "-lrt",
         ],
     }),
     deps = [

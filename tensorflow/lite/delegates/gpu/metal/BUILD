@@ -46,7 +46,6 @@ objc_library(
     copts = DEFAULT_COPTS,
     sdk_frameworks = [
         "Metal",
-        "UIKit",
     ],
     deps = [
         "//tensorflow/lite/delegates/gpu/common:status",
@@ -107,7 +106,6 @@ objc_library(
     copts = DEFAULT_COPTS,
     sdk_frameworks = [
         "Metal",
-        "UIKit",
     ],
     deps = [
         ":common",
