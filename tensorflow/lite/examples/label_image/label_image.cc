@@ -35,7 +35,6 @@ limitations under the License.
 
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/kernels/register.h"
-#include "tensorflow/lite/model.h"
 #include "tensorflow/lite/optional_debug_tools.h"
 #include "tensorflow/lite/string_util.h"
 
@@ -201,30 +200,8 @@ void RunInference(Settings* s) {
     LOG(INFO) << "number of inputs: " << inputs.size() << "\n";
     LOG(INFO) << "number of outputs: " << outputs.size() << "\n";
   }
-#if 0
-#if defined(ANDROID) || defined(__ANDROID__)
-  TfLiteGpuDelegateOptions kMyOptions = {
-      .metadata = nullptr,
-      .compile_options =
-          {
-              .precision_loss_allowed = 0,
-              .preferred_gl_object_type = TFLITE_GL_OBJECT_TYPE_FASTEST,
-              .dynamic_batch_enabled = 0,
-          },
-  };
-  if (s->allow_fp16) kMyOptions.compile_options.precision_loss_allowed = 1;
 
-  TfLiteDelegate* delegate;
-  if (s->gl_backend) {
-    delegate = TfLiteGpuDelegateCreate(&kMyOptions);
-    if (interpreter->ModifyGraphWithDelegate(delegate) != kTfLiteOk) return;
-  } else {
-#endif
-#if defined(ANDROID) || defined(__ANDROID__)
-  }
-#endif
-#endif
-
+#if defined(__ANDROID__)
   auto delegates_ = GetDelegates(s);
   for (const auto& delegate : delegates_) {
     if (interpreter->ModifyGraphWithDelegate(delegate.second.get()) !=
@@ -234,6 +211,7 @@ void RunInference(Settings* s) {
       LOG(INFO) << "Applied " << delegate.first << " delegate.";
     }
   }
+#endif
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     LOG(FATAL) << "Failed to allocate tensors!";
