@@ -34,6 +34,7 @@ limitations under the License.
 #include <unistd.h>     // NOLINT(build/include_order)
 
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
+#include "tensorflow/lite/experimental/writer/writer_lib.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/optional_debug_tools.h"
 #include "tensorflow/lite/string_util.h"
@@ -48,10 +49,10 @@ namespace label_image {
 
 double get_us(struct timeval t) { return (t.tv_sec * 1000000 + t.tv_usec); }
 
-#if defined(__ANDROID__)
 using TfLiteDelegatePtr = tflite::Interpreter::TfLiteDelegatePtr;
 using TfLiteDelegatePtrMap = std::map<std::string, TfLiteDelegatePtr>;
 
+#if defined(__ANDROID__)
 Interpreter::TfLiteDelegatePtr CreateGPUDelegate(Settings* s) {
   TfLiteGpuDelegateOptions options;
   options.metadata = TfLiteGpuDelegateGetModelMetadata(s->model->GetModel());
@@ -72,6 +73,7 @@ Interpreter::TfLiteDelegatePtr CreateNNAPIDelegate() {
       // NnApiDelegate() returns a singleton, so provide a no-op deleter.
       [](TfLiteDelegate*) {});
 }
+#endif  // defined(__ANDROID__)
 
 TfLiteDelegatePtrMap GetDelegates(Settings* s) {
   TfLiteDelegatePtrMap delegates;
@@ -79,19 +81,18 @@ TfLiteDelegatePtrMap GetDelegates(Settings* s) {
 #if defined(__ANDROID__)
     delegates.emplace("GPU", CreateGPUDelegate(s));
 #else
-    TFLITE_LOG(WARN) << "GPU acceleration is unsupported on this platform.";
+    LOG(WARN) << "GPU acceleration is unsupported on this platform.";
 #endif
   }
   if (s->accel) {
 #if defined(__ANDROID__)
     delegates.emplace("NNAPI", CreateNNAPIDelegate());
 #else
-    TFLITE_LOG(WARN) << "NNAPI acceleration is unsupported on this platform.";
+    LOG(WARN) << "NNAPI acceleration is unsupported on this platform.";
 #endif
   }
   return delegates;
 }
-#endif  // defined(__ANDROID__)
 
 // Takes a file name, and loads a list of labels from it, one per line, and
 // returns a vector of the strings. It pads with empty strings so the length
@@ -211,6 +212,8 @@ void RunInference(Settings* s) {
       LOG(INFO) << "Applied " << delegate.first << " delegate.";
     }
   }
+  tflite::InterpreterWriter writer(interpreter.get());
+  writer.Write("/data/local/tmp/output.tflite");
 #endif
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {

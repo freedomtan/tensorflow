@@ -32,9 +32,17 @@ cc_binary(
         "//tensorflow/lite/delegates/nnapi:nnapi_delegate",
         "//tensorflow/lite/kernels:builtin_ops",
     ] + select({
-        "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
-        "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
-        "//conditions:default": [],
+        "//tensorflow:android": [
+          "//tensorflow/lite/delegates/gpu:gl_delegate",
+          "//tensorflow/lite/experimental/writer:writer_lib"
+        ],
+        "//tensorflow:android_arm64": [
+          "//tensorflow/lite/delegates/gpu:gl_delegate",
+          "//tensorflow/lite/experimental/writer:writer_lib"
+        ],
+        "//conditions:default": [
+          "//tensorflow/lite/experimental/writer:writer_lib"
+        ],
     }),
 )
 
