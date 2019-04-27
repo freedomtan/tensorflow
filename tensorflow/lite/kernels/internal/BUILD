@@ -548,6 +548,9 @@ cc_library(
         ":armv7a": [
             ":neon_tensor_utils",
         ],
+        ":freebsd": [
+            ":neon_tensor_utils",
+        ],
         ":haswell": [
             ":neon_tensor_utils",
         ],
