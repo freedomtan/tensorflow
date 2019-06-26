@@ -32,6 +32,8 @@ limitations under the License.
 #include <unordered_set>
 #include <vector>
 
+#include "edgetpu.h"
+
 #include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
 #include "tensorflow/lite/kernels/register.h"
@@ -93,6 +95,8 @@ void RunInference(Settings* s) {
     exit(-1);
   }
 
+  edgetpu::EdgeTpuContext* edgetpu_context =
+    edgetpu::EdgeTpuManager::GetSingleton()->NewEdgeTpuContext().release();
   std::unique_ptr<tflite::FlatBufferModel> model;
   std::unique_ptr<tflite::Interpreter> interpreter;
   model = tflite::FlatBufferModel::BuildFromFile(s->model_name.c_str());
@@ -105,6 +109,7 @@ void RunInference(Settings* s) {
   LOG(INFO) << "resolved reporter\n";
 
   tflite::ops::builtin::BuiltinOpResolver resolver;
+  resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
 
   tflite::InterpreterBuilder(*model, resolver)(&interpreter);
   if (!interpreter) {
@@ -112,6 +117,7 @@ void RunInference(Settings* s) {
     exit(-1);
   }
 
+  interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
   interpreter->UseNNAPI(s->accel);
   interpreter->SetAllowFp16PrecisionForFp32(s->allow_fp16);
 
@@ -130,6 +136,7 @@ void RunInference(Settings* s) {
                   << interpreter->tensor(i)->params.scale << ", "
                   << interpreter->tensor(i)->params.zero_point << "\n";
     }
+    edgetpu::EdgeTpuManager::GetSingleton()->SetVerbosity(10);
   }
 
   if (s->number_of_threads != -1) {

@@ -148,3 +148,8 @@ http_archive(
         "http://download.tensorflow.org/models/speech_commands_v0.01.zip",
     ],
 )
+
+local_repository(
+    name = "libedgetpu",
+    path = "libedgetpu",
+)
