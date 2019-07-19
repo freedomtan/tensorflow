@@ -34,13 +34,13 @@ namespace xla {
 
 namespace {
 // Error collector that simply ignores errors reported.
-class NoOpErrorCollector : public ::proto2::io::ErrorCollector {
+class NoOpErrorCollector : public google::protobuf::io::ErrorCollector {
  public:
   void AddError(int line, int column, const string& message) override {}
 };
 
 bool LoadHloProto(const std::string& contents, HloProto* hlo_proto) {
-  ::proto2::TextFormat::Parser parser;
+  google::protobuf::TextFormat::Parser parser;
   NoOpErrorCollector collector;
   parser.RecordErrorsTo(&collector);
   return hlo_proto->ParseFromString(contents) ||
