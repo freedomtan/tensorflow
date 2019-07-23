@@ -56,6 +56,7 @@ cc_library(
         "lib/IR/SymbolTable.cpp",
         "lib/IR/TypeDetail.h",
         "lib/IR/Types.cpp",
+        "lib/IR/TypeUtilities.cpp",
         "lib/IR/Value.cpp",
     ],
     hdrs = [
@@ -90,6 +91,7 @@ cc_library(
         "include/mlir/IR/SymbolTable.h",
         "include/mlir/IR/TypeSupport.h",
         "include/mlir/IR/Types.h",
+        "include/mlir/IR/TypeUtilities.h",
         "include/mlir/IR/UseDefLists.h",
         "include/mlir/IR/Value.h",
     ],
@@ -415,10 +417,10 @@ cc_library(
 cc_library(
     name = "TypeUtilities",
     srcs = [
-        "lib/Support/TypeUtilities.cpp",
+        "lib/IR/TypeUtilities.cpp",
     ],
     hdrs = [
-        "include/mlir/Support/TypeUtilities.h",
+        "include/mlir/IR/TypeUtilities.h",
     ],
     includes = ["include"],
     deps = [
@@ -773,7 +775,7 @@ gentbl(
     name = "SPIRVSerializationIncGen",
     tbl_outs = [
         (
-            "-gen-spirv-serial",
+            "-gen-spirv-serialization",
             "include/mlir/Dialect/SPIRV/SPIRVSerialization.inc",
         ),
     ],
@@ -944,7 +946,6 @@ cc_library(
         "lib/Transforms/LoopCoalescing.cpp",
         "lib/Transforms/LoopFusion.cpp",
         "lib/Transforms/LoopInvariantCodeMotion.cpp",
-        "lib/Transforms/LoopParametricTiling.cpp",
         "lib/Transforms/LoopTiling.cpp",
         "lib/Transforms/LoopUnroll.cpp",
         "lib/Transforms/LoopUnrollAndJam.cpp",
@@ -1103,6 +1104,7 @@ cc_library(
     deps = [
         ":AffineOps",
         ":IR",
+        ":LoopOps",
         ":Pass",
         ":StandardOps",
         ":Support",
