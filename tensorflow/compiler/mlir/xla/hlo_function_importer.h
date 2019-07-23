@@ -36,6 +36,7 @@ class HloModule;
 class HloComputation;
 class HloInstruction;
 class Shape;
+using tensorflow::int64;
 
 // Helper class for importing HloComputations.
 class HloFunctionImporter {
