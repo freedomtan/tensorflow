@@ -136,7 +136,7 @@ ConvertToDenseElementsAttr(
 // Template parameter `T` must match the element type of the `type` argument
 // (this is checked in DenseElementsAttr::get()).
 template <typename T>
-mlir::DenseElementsAttr ConvertToDenseElementsAttr(const absl::Cord& values,
+mlir::DenseElementsAttr ConvertToDenseElementsAttr(const std::string& values,
                                                    ShapedType type,
                                                    Builder* builder) {
   DCHECK_EQ((values.size() % sizeof(T)), 0)
@@ -145,7 +145,7 @@ mlir::DenseElementsAttr ConvertToDenseElementsAttr(const absl::Cord& values,
   auto data = absl::make_unique<T[]>(n_elements);
   // This assumes that the endianess conversion was handled when loading the
   // tensor in memory.
-  values.CopyToArray(reinterpret_cast<char*>(data.get()));
+  values.copy(reinterpret_cast<char*>(data.get()), values.size(), 0);
   return mlir::DenseElementsAttr::get(
       type, llvm::makeArrayRef(data.get(), n_elements));
 }
