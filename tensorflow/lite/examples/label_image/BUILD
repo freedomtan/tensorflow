@@ -35,6 +35,8 @@ cc_binary(
         "//tensorflow/lite/profiling:profiler",
         "//tensorflow/lite/tools/evaluation:utils",
         "@com_google_absl//absl/memory",
+	"@libedgetpu//:header",
+	"@libedgetpu//:lib",
     ] + select({
         "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
         "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
