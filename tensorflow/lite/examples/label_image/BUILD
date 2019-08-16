@@ -37,8 +37,14 @@ cc_binary(
         "//tensorflow/lite/tools/evaluation:utils",
         "@com_google_absl//absl/memory",
     ] + select({
-        "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
-        "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//tensorflow:android": [
+          "//tensorflow/lite/delegates/gpu:gl_delegate",
+          "//tensorflow/lite/experimental/writer:writer_lib",
+        ],
+        "//tensorflow:android_arm64": [
+          "//tensorflow/lite/delegates/gpu:gl_delegate",
+          "//tensorflow/lite/experimental/writer:writer_lib",
+        ],
         "//conditions:default": [],
     }),
 )

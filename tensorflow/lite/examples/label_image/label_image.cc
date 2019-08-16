@@ -39,6 +39,7 @@ limitations under the License.
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
+#include "tensorflow/lite/experimental/writer/writer_lib.h"
 #include "tensorflow/lite/kernels/register.h"
 #include "tensorflow/lite/optional_debug_tools.h"
 #include "tensorflow/lite/profiling/profiler.h"
@@ -208,6 +209,8 @@ void RunInference(Settings* s) {
     } else {
       LOG(INFO) << "Applied " << delegate.first << " delegate.";
     }
+    tflite::InterpreterWriter writer(interpreter.get());
+    writer.Write("/data/local/tmp/output.tflite");
   }
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
