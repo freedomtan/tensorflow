@@ -36,6 +36,7 @@ limitations under the License.
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "tensorflow/lite/delegates/gpu/cl/gpu_api_delegate.h"
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
@@ -74,6 +75,11 @@ TfLiteDelegatePtr CreateGPUDelegate(Settings* s) {
 #endif
 }
 
+TfLiteDelegatePtr CreateGPUCLDelegate(Settings* s) {
+  return Interpreter::TfLiteDelegatePtr(TfLiteGpuDelegateCreate_New(nullptr),
+                                        &TfLiteGpuDelegateDelete_New);
+}
+
 TfLiteDelegatePtrMap GetDelegates(Settings* s) {
   TfLiteDelegatePtrMap delegates;
   if (s->gl_backend) {
@@ -81,11 +87,15 @@ TfLiteDelegatePtrMap GetDelegates(Settings* s) {
     if (!delegate) {
       LOG(INFO) << "GPU acceleration is unsupported on this platform.";
     } else {
-      delegates.emplace("GPU", std::move(delegate));
+      delegates.emplace("GPU GL Compute", std::move(delegate));
     }
-  }
-
-  if (s->accel) {
+  } else if (s->cl_backend) {
+    auto delegate = CreateGPUCLDelegate(s);
+    if (!delegate) {
+      LOG(INFO) << "GPU acceleration is unsupported on this platform.";
+    }
+     delegates.emplace("GPU OpenCL", std::move(delegate));
+  } else if (s->accel) {
     auto delegate = evaluation::CreateNNAPIDelegate();
     if (!delegate) {
       LOG(INFO) << "NNAPI acceleration is unsupported on this platform.";
@@ -325,7 +335,8 @@ void display_usage() {
       << "--old_accelerated, -d: [0|1], use old Android NNAPI delegate or not\n"
       << "--allow_fp16, -f: [0|1], allow running fp32 models with fp16 or not\n"
       << "--count, -c: loop interpreter->Invoke() for certain times\n"
-      << "--gl_backend, -g: use GL GPU Delegate on Android\n"
+      << "--gl_backend, -g: use GL GPU Delegate GL on Android\n"
+      << "--cl_backend, -g: use GL GPU Delegate CL on Android\n"
       << "--input_mean, -b: input mean\n"
       << "--input_std, -s: input standard deviation\n"
       << "--image, -i: image_name.bmp\n"
@@ -361,13 +372,14 @@ int Main(int argc, char** argv) {
         {"max_profiling_buffer_entries", required_argument, nullptr, 'e'},
         {"warmup_runs", required_argument, nullptr, 'w'},
         {"gl_backend", required_argument, nullptr, 'g'},
+        {"cl_backend", required_argument, nullptr, 'o'},
         {nullptr, 0, nullptr, 0}};
 
     /* getopt_long stores the option index here. */
     int option_index = 0;
 
     c = getopt_long(argc, argv,
-                    "a:b:c:d:e:f:g:i:l:m:p:r:s:t:v:w:", long_options,
+                    "a:b:c:d:e:f:g:i:l:m:o:p:r:s:t:v:w:", long_options,
                     &option_index);
 
     /* Detect the end of the options. */
@@ -408,6 +420,10 @@ int Main(int argc, char** argv) {
         break;
       case 'm':
         s.model_name = optarg;
+        break;
+      case 'o':
+        s.cl_backend =
+            strtol(optarg, nullptr, 10);  // NOLINT(runtime/deprecated_fn)
         break;
       case 'p':
         s.profiling =

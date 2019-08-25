@@ -37,7 +37,10 @@ cc_binary(
         "@com_google_absl//absl/memory",
     ] + select({
         "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
-        "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//tensorflow:android_arm64": [
+          "//tensorflow/lite/delegates/gpu:gl_delegate",
+          "//tensorflow/lite/delegates/gpu/cl:gpu_api_delegate",
+        ],
         "//conditions:default": [],
     }),
 )

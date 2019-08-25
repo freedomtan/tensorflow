@@ -29,6 +29,7 @@ struct Settings {
   bool input_floating = false;
   bool profiling = false;
   bool allow_fp16 = false;
+  bool cl_backend = false;
   bool gl_backend = false;
   int loop_count = 1;
   float input_mean = 127.5f;
