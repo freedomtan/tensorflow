@@ -76,7 +76,17 @@ TfLiteDelegatePtr CreateGPUDelegate(Settings* s) {
 }
 
 TfLiteDelegatePtr CreateGPUCLDelegate(Settings* s) {
-  return Interpreter::TfLiteDelegatePtr(TfLiteGpuDelegateCreate_New(nullptr),
+  TfLiteGpuDelegateOptions_New options;
+
+  if (s->allow_fp16) {
+    options.compile_options = {.precision_loss_allowed = true};
+  } else {
+    options.compile_options = {.precision_loss_allowed = false};
+  }
+  options.egl_display = eglGetCurrentDisplay();
+  options.egl_context = eglGetCurrentContext();
+
+  return Interpreter::TfLiteDelegatePtr(TfLiteGpuDelegateCreate_New(&options),
                                         &TfLiteGpuDelegateDelete_New);
 }
 
