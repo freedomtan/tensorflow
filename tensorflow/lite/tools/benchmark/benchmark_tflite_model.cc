@@ -24,6 +24,7 @@ limitations under the License.
 #include <vector>
 
 #if defined(__ANDROID__)
+#include "tensorflow/lite/delegates/gpu/cl/gpu_api_delegate.h"
 #include "tensorflow/lite/delegates/gpu/gl_delegate.h"
 #endif
 
@@ -214,6 +215,7 @@ BenchmarkParams BenchmarkTfLiteModel::DefaultParams() {
   default_params.AddParam("nnapi_accelerator_name",
                           BenchmarkParam::Create<std::string>(""));
   default_params.AddParam("use_gpu", BenchmarkParam::Create<bool>(false));
+  default_params.AddParam("use_gpu_cl", BenchmarkParam::Create<bool>(false));
 #if defined(__ANDROID__)
   default_params.AddParam("gpu_precision_loss_allowed",
                           BenchmarkParam::Create<bool>(true));
@@ -267,6 +269,7 @@ std::vector<Flag> BenchmarkTfLiteModel::GetFlags() {
         "nnapi_accelerator_name", &params_,
         "the name of the nnapi accelerator to use (requires Android Q+)"),
     CreateFlag<bool>("use_gpu", &params_, "use gpu"),
+    CreateFlag<bool>("use_gpu_cl", &params_, "use gpu opencl"),
 #if defined(__ANDROID__)
     CreateFlag<bool>("gpu_precision_loss_allowed", &params_,
                      "Allow to process computation in lower precision than "
@@ -307,6 +310,7 @@ void BenchmarkTfLiteModel::LogParams() {
                      << params_.Get<string>("nnapi_accelerator_name") << "]";
   }
   TFLITE_LOG(INFO) << "Use gpu : [" << params_.Get<bool>("use_gpu") << "]";
+  TFLITE_LOG(INFO) << "Use gpu_cl : [" << params_.Get<bool>("use_gpu_cl") << "]";
 #if defined(__ANDROID__)
   TFLITE_LOG(INFO) << "Allow lower precision in gpu : ["
                    << params_.Get<bool>("gpu_precision_loss_allowed") << "]";
@@ -622,6 +626,32 @@ BenchmarkTfLiteModel::TfLiteDelegatePtrMap BenchmarkTfLiteModel::GetDelegates()
       TFLITE_LOG(WARN) << "GPU acceleration is unsupported on this platform.";
     } else {
       delegates.emplace("GPU", std::move(delegate));
+    }
+  }
+
+  if (params_.Get<bool>("use_gpu_cl")) {
+#if defined(__ANDROID__)
+    TfLiteGpuDelegateOptions_New gpu_opts;
+
+    gpu_opts.compile_options.precision_loss_allowed =
+        params_.Get<bool>("gpu_precision_loss_allowed") ? 1 : 0;
+
+    gpu_opts.egl_display = eglGetCurrentDisplay();
+    gpu_opts.egl_context = eglGetCurrentContext();
+
+    Interpreter::TfLiteDelegatePtr delegate =
+      Interpreter::TfLiteDelegatePtr(TfLiteGpuDelegateCreate_New(&gpu_opts),
+                                        &TfLiteGpuDelegateDelete_New);
+#else
+    TFLITE_LOG(WARN) << "The GPU delegate compile options aren't supported to "
+                        "be benchmarked on non-Android platforms.";
+    Interpreter::TfLiteDelegatePtr delegate =
+        evaluation::CreateGPUDelegate(model_.get());
+#endif
+    if (!delegate) {
+      TFLITE_LOG(WARN) << "GPU CL acceleration is unsupported on this platform.";
+    } else {
+      delegates.emplace("GPU CL", std::move(delegate));
     }
   }
   if (params_.Get<bool>("use_nnapi")) {

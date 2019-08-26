@@ -111,6 +111,7 @@ cc_library(
         ":logging",
         "//tensorflow/lite:framework",
         "//tensorflow/lite:string_util",
+	"//tensorflow/lite/delegates/gpu/cl:gpu_api_delegate",
         "//tensorflow/lite/kernels:builtin_ops",
         "//tensorflow/lite/profiling:profile_summarizer",
         "//tensorflow/lite/profiling:profiler",
