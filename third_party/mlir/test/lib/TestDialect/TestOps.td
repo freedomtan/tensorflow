@@ -109,8 +109,9 @@ def TypeStringAttrWithTypeOp : TEST_Op<"string_attr_with_type"> {
   let printer = [{ *p << getAttr("attr"); }];
   let parser = [{
     Attribute attr;
-    Type stringType = OpaqueType::get(Identifier::get("foo", result->context),
-                                      "string", result->context);
+    Type stringType = OpaqueType::get(Identifier::get("foo",
+                                      result->getContext()), "string",
+                                      result->getContext());
     return parser->parseAttribute(attr, stringType, "attr", result->attributes);
   }];
 }
@@ -338,9 +339,23 @@ def : Pat<(OpAllAttrConstraint1
           (OpAllAttrConstraint2 $attr)>;
 
 // Op for testing RewritePattern removing op with inner ops.
-def TestOpWithRegion : TEST_Op<"op_with_region"> {
+def TestOpWithRegionPattern : TEST_Op<"op_with_region_pattern"> {
   let regions = (region SizedRegion<1>:$region);
   let hasCanonicalizer = 1;
+}
+
+// Op for testing trivial removal via folding of op with inner ops and no uses.
+def TestOpWithRegionFoldNoSideEffect : TEST_Op<
+    "op_with_region_fold_no_side_effect", [NoSideEffect]> {
+  let regions = (region SizedRegion<1>:$region);
+}
+
+// Op for testing folding of outer op with inner ops.
+def TestOpWithRegionFold : TEST_Op<"op_with_region_fold"> {
+  let arguments = (ins I32:$operand);
+  let results = (outs I32:$result);
+  let regions = (region SizedRegion<1>:$region);
+  let hasFolder = 1;
 }
 
 //===----------------------------------------------------------------------===//
