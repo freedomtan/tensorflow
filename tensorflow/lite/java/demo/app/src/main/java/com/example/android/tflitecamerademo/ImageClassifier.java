@@ -183,8 +183,11 @@ public abstract class ImageClassifier {
   }
 
   public void useNNAPI() {
-    nnapiDelegate = new NnApiDelegate();
+    NnApiDelegate.Options options = new NnApiDelegate.Options();
+    options.setExecutionPreference(NnApiDelegate.Options.EXECUTION_PREFERENCE_LOW_POWER);
+    nnapiDelegate = new NnApiDelegate(options);
     tfliteOptions.addDelegate(nnapiDelegate);
+    tfliteOptions.setAllowFp16PrecisionForFp32(true);
     recreateInterpreter();
   }
 
