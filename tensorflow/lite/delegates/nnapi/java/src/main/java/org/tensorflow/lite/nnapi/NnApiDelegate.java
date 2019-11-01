@@ -29,37 +29,33 @@ public class NnApiDelegate implements Delegate, AutoCloseable {
   public static final class Options {
     public Options() {}
 
-    /**
-     * undefined
-     */
+    /** undefined */
     public static final int EXECUTION_PREFERENCE_UNDEFINED = -1;
 
     /**
-     * Prefer executing in a way that minimizes battery drain.
-     * This is desirable for compilations that will be executed often.
+     * Prefer executing in a way that minimizes battery drain. This is desirable for compilations
+     * that will be executed often.
      */
-    public static final int EXECUTION_PREFERENCE_LOW_POWER =  0;
+    public static final int EXECUTION_PREFERENCE_LOW_POWER = 0;
 
     /**
-     * Prefer returning a single answer as fast as possible, even if this
-     * causes more power consumption.
+     * Prefer returning a single answer as fast as possible, even if this causes more power
+     * consumption.
      */
-    public static final int EXECUTION_PREFERENCE_FAST_SINGLE_ANSWER =  1;
+    public static final int EXECUTION_PREFERENCE_FAST_SINGLE_ANSWER = 1;
 
     /**
-     * Prefer maximizing the throughput of successive frames, for example
-     * when processing successive frames coming from the camera.
+     * Prefer maximizing the throughput of successive frames, for example when processing successive
+     * frames coming from the camera.
      */
-    public static final int EXECUTION_PREFERENCE_SUSTAINED_SPEED =  2;
+    public static final int EXECUTION_PREFERENCE_SUSTAINED_SPEED = 2;
 
     /**
      * Sets the inference preference for precision/compilation/runtime tradeoffs.
      *
      * @param preference One of EXECUTION_PREFERENCE_LOW_POWER,
-     * EXECUTION_PREFERENCE_FAST_SINGLE_ANSWER, and
-     * EXECUTION_PREFERENCE_SUSTAINED_SPEED.
+     *     EXECUTION_PREFERENCE_FAST_SINGLE_ANSWER, and EXECUTION_PREFERENCE_SUSTAINED_SPEED.
      */
-
     public Options setExecutionPreference(int preference) {
       this.executionPreference = preference;
       return this;
@@ -87,7 +83,12 @@ public class NnApiDelegate implements Delegate, AutoCloseable {
   }
 
   public NnApiDelegate(Options options) {
-    delegateHandle = createDelegate(options.executionPreference, options.accelerator_name, options.cache_dir, options.model_token);
+    delegateHandle =
+        createDelegate(
+            options.executionPreference,
+            options.accelerator_name,
+            options.cache_dir,
+            options.model_token);
   }
 
   public NnApiDelegate() {
@@ -113,7 +114,9 @@ public class NnApiDelegate implements Delegate, AutoCloseable {
   }
 
   // private static native long createDelegate(int preference);
-  private static native long createDelegate(int preference, String device_name, String cache_dir, String model_token);
+  private static native long createDelegate(
+      int preference, String device_name, String cache_dir, String model_token);
+
   private static native void deleteDelegate(long delegateHandle);
 
   static {
