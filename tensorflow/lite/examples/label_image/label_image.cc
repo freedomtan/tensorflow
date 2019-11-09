@@ -36,7 +36,7 @@ limitations under the License.
 #include <vector>
 
 #include "absl/memory/memory.h"
-#include "edgetpu.h"
+#include "edgetpu_c.h"
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
@@ -143,8 +143,6 @@ void RunInference(Settings* s) {
     exit(-1);
   }
 
-  edgetpu::EdgeTpuContext* edgetpu_context =
-    edgetpu::EdgeTpuManager::GetSingleton()->NewEdgeTpuContext().release();
   std::unique_ptr<tflite::FlatBufferModel> model;
   std::unique_ptr<tflite::Interpreter> interpreter;
   model = tflite::FlatBufferModel::BuildFromFile(s->model_name.c_str());
@@ -158,15 +156,12 @@ void RunInference(Settings* s) {
   LOG(INFO) << "resolved reporter\n";
 
   tflite::ops::builtin::BuiltinOpResolver resolver;
-  resolver.AddCustom(edgetpu::kCustomOp, edgetpu::RegisterCustomOp());
 
   tflite::InterpreterBuilder(*model, resolver)(&interpreter);
   if (!interpreter) {
     LOG(FATAL) << "Failed to construct interpreter\n";
     exit(-1);
   }
-
-  interpreter->SetExternalContext(kTfLiteEdgeTpuContext, edgetpu_context);
 
   interpreter->UseNNAPI(s->old_accel);
   interpreter->SetAllowFp16PrecisionForFp32(s->allow_fp16);
@@ -186,7 +181,7 @@ void RunInference(Settings* s) {
                   << interpreter->tensor(i)->params.scale << ", "
                   << interpreter->tensor(i)->params.zero_point << "\n";
     }
-    edgetpu::EdgeTpuManager::GetSingleton()->SetVerbosity(10);
+    edgetpu_verbosity(10);
   }
 
   if (s->number_of_threads != -1) {
@@ -219,6 +214,16 @@ void RunInference(Settings* s) {
       LOG(INFO) << "Applied " << delegate.first << " delegate.";
     }
   }
+
+  size_t num_devices;
+  std::unique_ptr<edgetpu_device, decltype(&edgetpu_free_devices)> devices(
+		  edgetpu_list_devices(&num_devices), &edgetpu_free_devices);
+
+  assert(num_devices > 0);
+  const auto& device = devices.get()[0];
+
+  auto *delegate = edgetpu_create_delegate(device.type, device.path, nullptr, 0);
+  interpreter->ModifyGraphWithDelegate({delegate, edgetpu_free_delegate});
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     LOG(FATAL) << "Failed to allocate tensors!";

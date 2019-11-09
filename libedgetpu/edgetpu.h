@@ -93,6 +93,16 @@ limitations under the License.
 
 #include "tensorflow/lite/context.h"
 
+#if defined(_WIN32)
+#ifdef EDGETPU_COMPILE_LIBRARY
+#define EDGETPU_EXPORT __declspec(dllexport)
+#else
+#define EDGETPU_EXPORT __declspec(dllimport)
+#endif  // EDGETPU_COMPILE_LIBRARY
+#else
+#define EDGETPU_EXPORT
+#endif  // _WIN32
+
 namespace edgetpu {
 
 // EdgeTPU custom op.
@@ -107,7 +117,7 @@ class EdgeTpuContext;
 
 // Singleton edge TPU manager for allocating new TPU contexts.
 // Functions in this interface are thread-safe.
-class EdgeTpuManager {
+class EDGETPU_EXPORT EdgeTpuManager {
  public:
   using DeviceOptions = std::unordered_map<std::string, std::string>;
   struct DeviceEnumerationRecord {
@@ -269,10 +279,11 @@ class EdgeTpuContext : public TfLiteExternalContext {
 // Returns pointer to an instance of TfLiteRegistration to handle
 // EdgeTPU custom ops, to be used with
 // tflite::ops::builtin::BuiltinOpResolver::AddCustom
-TfLiteRegistration* RegisterCustomOp();
+EDGETPU_EXPORT TfLiteRegistration* RegisterCustomOp();
 
 // Inserts name of device type into ostream. Returns the modified ostream.
-std::ostream& operator<<(std::ostream& out, DeviceType device_type);
+EDGETPU_EXPORT std::ostream& operator<<(std::ostream& out,
+                                        DeviceType device_type);
 
 }  // namespace edgetpu
 

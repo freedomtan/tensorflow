@@ -22,7 +22,7 @@ config_setting(
 
 cc_library(
     name = "header",
-    hdrs = ["edgetpu.h"],
+    hdrs = ["edgetpu.h", "edgetpu_c.h"],
     deps = [
         "@org_tensorflow//tensorflow/lite:context",
     ],
