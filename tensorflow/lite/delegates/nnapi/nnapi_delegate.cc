@@ -4000,8 +4000,9 @@ TfLiteStatus StatefulNnApiDelegate::DoPrepare(TfLiteContext* context,
       if (device_count <= 1) {
         return kTfLiteOk;
       }
-      is_accelerator_specified = true;
     }
+  } else {
+    is_accelerator_specified = true;
   }
   // Allocate one element in vector already since TensorFlow Lite uses
   // the first value as the number of nodes. The actual value will be set
