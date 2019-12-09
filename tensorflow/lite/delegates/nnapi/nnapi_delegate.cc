@@ -2969,6 +2969,7 @@ TfLiteStatus NNAPIDelegateKernel::Init(TfLiteContext* context,
                                       "creating NNAPI compilation",
                                       nnapi_errno);
     }
+ 
 
     auto preference = delegate_options.execution_preference;
     if (preference !=
@@ -3049,6 +3050,8 @@ TfLiteStatus NNAPIDelegateKernel::Invoke(TfLiteContext* context,
                                   "creating NNAPI execution", nnapi_errno);
   std::unique_ptr<ANeuralNetworksExecution, NNFreeExecution>
       execution_unique_ptr(execution);
+
+  nnapi_->ANeuralNetworksExecution_setMeasureTiming(execution, true);
 
   // Set the input tensor buffers. Note: we access tflite tensors using
   // absolute indices but NN api indices inputs by relative indices.
@@ -3205,6 +3208,12 @@ TfLiteStatus NNAPIDelegateKernel::Invoke(TfLiteContext* context,
         context, nnapi_->ANeuralNetworksExecution_compute(execution),
         "running computation", nnapi_errno);
   }
+  
+  uint64_t hard_duration = 0;
+  uint64_t nnapi_duration = 0;
+  nnapi_->ANeuralNetworksExecution_getDuration(execution, ANEURALNETWORKS_DURATION_IN_DRIVER, &nnapi_duration);
+  nnapi_->ANeuralNetworksExecution_getDuration(execution, ANEURALNETWORKS_DURATION_ON_HARDWARE, &hard_duration);
+  printf("duration = (%6.2f, %6.2f) = %6.2f\n", nnapi_duration / 1000000.0, hard_duration / 1000000.0, (nnapi_duration - hard_duration)/1000000.0);
 
   // copy results from shared memory to the destination.
   output_offset = 0;
