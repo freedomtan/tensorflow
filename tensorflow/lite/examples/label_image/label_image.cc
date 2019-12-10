@@ -210,7 +210,7 @@ void RunInference(Settings* s) {
       LOG(INFO) << "Applied " << delegate.first << " delegate.";
     }
     tflite::InterpreterWriter writer(interpreter.get());
-    writer.Write("/data/local/tmp/output.tflite");
+    writer.Write("modified_"+s->model_name);
   }
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
