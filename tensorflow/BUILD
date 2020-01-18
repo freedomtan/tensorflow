@@ -182,6 +182,15 @@ config_setting(
 )
 
 config_setting(
+    name = "macos_x86_64",
+    values = {
+        "apple_platform_type": "macos",
+        "cpu": "darwin_x86_64",
+    },
+    visibility = ["//visibility:public"],
+)
+
+config_setting(
     name = "ios",
     values = {"apple_platform_type": "ios"},
     visibility = ["//visibility:public"],

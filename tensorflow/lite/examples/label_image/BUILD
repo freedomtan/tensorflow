@@ -2,6 +2,7 @@
 # TensorFlow Lite Example Label Image.
 
 load("//tensorflow/lite:build_def.bzl", "tflite_linkopts")
+load("@build_bazel_rules_apple//apple:macos.bzl", "macos_dylib")
 
 package(
     default_visibility = ["//visibility:public"],
@@ -28,8 +29,8 @@ cc_binary(
     }),
     deps = [
         ":bitmap_helpers",
-        "//tensorflow/lite:framework",
-        "//tensorflow/lite:string_util",
+        #"//tensorflow/lite:framework",
+        #"//tensorflow/lite:string_util",
         "//tensorflow/lite/delegates/nnapi:nnapi_delegate",
         "//tensorflow/lite/kernels:builtin_ops",
         "//tensorflow/lite/profiling:profiler",
@@ -38,6 +39,8 @@ cc_binary(
     ] + select({
         "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
         "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//tensorflow:macos": ["//tensorflow/lite/delegates/gpu:metal_delegate"],
+        "//tensorflow:macos_x86_64": ["//tensorflow/lite/delegates/gpu:metal_delegate"],
         "//conditions:default": [],
     }),
 )
@@ -60,6 +63,7 @@ cc_library(
     ] + select({
         "//tensorflow:android": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
         "//tensorflow:android_arm64": ["//tensorflow/lite/delegates/gpu:gl_delegate"],
+        "//tensorflow:macos": ["//tensorflow/lite/delegates/gpu:metal_delegate"],
         "//conditions:default": [],
     }),
 )

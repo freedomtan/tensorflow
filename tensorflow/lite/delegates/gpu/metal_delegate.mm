@@ -175,7 +175,8 @@ class Delegate {
       options_.allow_precision_loss = false;
       options_.wait_type = TFLGpuDelegateWaitType::TFLGpuDelegateWaitTypePassive;
     }
-    metal_device_ = MTLCreateSystemDefaultDevice();
+    // metal_device_ = MTLCreateSystemDefaultDevice();
+    metal_device_ = MTLCopyAllDevices()[0];//MTLCreateSystemDefaultDevice();
     command_queue_ = [metal_device_ newCommandQueue];
     if (options_.wait_type == TFLGpuDelegateWaitType::TFLGpuDelegateWaitTypeAggressive) {
       gpu_alarm_clock_ = std::unique_ptr<GpuAlarmClock>(new GpuAlarmClock(command_queue_));

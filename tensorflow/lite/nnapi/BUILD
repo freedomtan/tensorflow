@@ -53,6 +53,7 @@ cc_library(
         "//tensorflow:emscripten": [],
         "//tensorflow:ios": [],
         "//tensorflow:macos": [],
+        "//tensorflow:macos_x86_64": [],
         "//tensorflow:windows": [],
         "//conditions:default": ["-lrt"],
     }),

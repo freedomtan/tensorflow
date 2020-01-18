@@ -36,6 +36,7 @@ limitations under the License.
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "tensorflow/lite/delegates/gpu/metal_delegate.h"
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
@@ -72,7 +73,31 @@ TfLiteDelegatePtr CreateGPUDelegate(Settings* s) {
 TfLiteDelegatePtrMap GetDelegates(Settings* s) {
   TfLiteDelegatePtrMap delegates;
   if (s->gl_backend) {
+#if __ANDROID__
     auto delegate = CreateGPUDelegate(s);
+#else
+    TFLGpuDelegateOptions gpu_opts = {0};
+    gpu_opts.allow_precision_loss = 1;
+
+    std::string string_gpu_wait_type = "passive";
+
+    if (!string_gpu_wait_type.empty()) {
+      TFLGpuDelegateWaitType wait_type = TFLGpuDelegateWaitTypePassive;
+      if (string_gpu_wait_type == "passive") {
+        wait_type = TFLGpuDelegateWaitTypePassive;
+      } else if (string_gpu_wait_type == "active") {
+        wait_type = TFLGpuDelegateWaitTypeActive;
+      } else if (string_gpu_wait_type == "do_not_wait") {
+        wait_type = TFLGpuDelegateWaitTypeDoNotWait;
+      } else if (string_gpu_wait_type == "aggressive") {
+        wait_type = TFLGpuDelegateWaitTypeAggressive;
+      }
+      gpu_opts.wait_type = wait_type;
+    }
+    Interpreter::TfLiteDelegatePtr delegate(TFLGpuDelegateCreate(&gpu_opts),
+                                            &TFLGpuDelegateDelete);
+
+#endif
     if (!delegate) {
       LOG(INFO) << "GPU acceleration is unsupported on this platform.";
     } else {
