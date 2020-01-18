@@ -73,30 +73,15 @@ TfLiteDelegatePtr CreateGPUDelegate(Settings* s) {
 TfLiteDelegatePtrMap GetDelegates(Settings* s) {
   TfLiteDelegatePtrMap delegates;
   if (s->gl_backend) {
-#if __ANDROID__
+#if defined(__ANDROID__)
     auto delegate = CreateGPUDelegate(s);
-#else
+#elif defined(__APPLE__)
     TFLGpuDelegateOptions gpu_opts = {0};
-    gpu_opts.allow_precision_loss = 1;
+    gpu_opts.allow_precision_loss = s->allow_fp16;
+    gpu_opts.wait_type = TFLGpuDelegateWaitTypePassive;
 
-    std::string string_gpu_wait_type = "passive";
-
-    if (!string_gpu_wait_type.empty()) {
-      TFLGpuDelegateWaitType wait_type = TFLGpuDelegateWaitTypePassive;
-      if (string_gpu_wait_type == "passive") {
-        wait_type = TFLGpuDelegateWaitTypePassive;
-      } else if (string_gpu_wait_type == "active") {
-        wait_type = TFLGpuDelegateWaitTypeActive;
-      } else if (string_gpu_wait_type == "do_not_wait") {
-        wait_type = TFLGpuDelegateWaitTypeDoNotWait;
-      } else if (string_gpu_wait_type == "aggressive") {
-        wait_type = TFLGpuDelegateWaitTypeAggressive;
-      }
-      gpu_opts.wait_type = wait_type;
-    }
     Interpreter::TfLiteDelegatePtr delegate(TFLGpuDelegateCreate(&gpu_opts),
                                             &TFLGpuDelegateDelete);
-
 #endif
     if (!delegate) {
       LOG(INFO) << "GPU acceleration is unsupported on this platform.";
