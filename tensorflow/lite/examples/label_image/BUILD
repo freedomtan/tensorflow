@@ -28,6 +28,7 @@ cc_binary(
     }),
     deps = [
         ":bitmap_helpers",
+	"//libedgetpu:header",
         "//tensorflow/lite:framework",
         "//tensorflow/lite:string_util",
         "//tensorflow/lite/delegates/nnapi:nnapi_delegate",

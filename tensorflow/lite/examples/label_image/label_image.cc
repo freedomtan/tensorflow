@@ -36,6 +36,7 @@ limitations under the License.
 #include <vector>
 
 #include "absl/memory/memory.h"
+#include "libedgetpu/edgetpu_c.h"
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 #include "tensorflow/lite/examples/label_image/bitmap_helpers.h"
 #include "tensorflow/lite/examples/label_image/get_top_n.h"
@@ -177,6 +178,7 @@ void RunInference(Settings* s) {
                   << interpreter->tensor(i)->params.scale << ", "
                   << interpreter->tensor(i)->params.zero_point << "\n";
     }
+    edgetpu_verbosity(10);
   }
 
   if (s->number_of_threads != -1) {
@@ -209,6 +211,16 @@ void RunInference(Settings* s) {
       LOG(INFO) << "Applied " << delegate.first << " delegate.";
     }
   }
+
+  size_t num_devices;
+  std::unique_ptr<edgetpu_device, decltype(&edgetpu_free_devices)> devices(
+		  edgetpu_list_devices(&num_devices), &edgetpu_free_devices);
+
+  assert(num_devices > 0);
+  const auto& device = devices.get()[0];
+
+  auto *delegate = edgetpu_create_delegate(device.type, device.path, nullptr, 0);
+  interpreter->ModifyGraphWithDelegate({delegate, edgetpu_free_delegate});
 
   if (interpreter->AllocateTensors() != kTfLiteOk) {
     LOG(FATAL) << "Failed to allocate tensors!";
