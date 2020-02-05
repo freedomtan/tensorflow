@@ -67,10 +67,12 @@ cc_library(
     ] + select({
         "//tensorflow:android": [
             "//tensorflow/lite/delegates/gpu:gl_delegate",
+            "//tensorflow/lite/delegates/xnnpack:xnnpack_delegate",
             "//tensorflow/lite/experimental/delegates/hexagon:hexagon_delegate",
         ],
         "//tensorflow:android_arm64": [
             "//tensorflow/lite/delegates/gpu:gl_delegate",
+            "//tensorflow/lite/delegates/xnnpack:xnnpack_delegate",
             "//tensorflow/lite/experimental/delegates/hexagon:hexagon_delegate",
         ],
         "//conditions:default": [],
