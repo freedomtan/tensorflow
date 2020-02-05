@@ -62,17 +62,16 @@ cc_library(
         "//tensorflow/lite:framework",
         "//tensorflow/lite:string",
         "//tensorflow/lite:string_util",
+        "//tensorflow/lite/delegates/xnnpack:xnnpack_delegate",
         "//tensorflow/lite/kernels:builtin_ops",
         "//tensorflow/lite/schema:schema_fbs",
     ] + select({
         "//tensorflow:android": [
             "//tensorflow/lite/delegates/gpu:gl_delegate",
-            "//tensorflow/lite/delegates/xnnpack:xnnpack_delegate",
             "//tensorflow/lite/experimental/delegates/hexagon:hexagon_delegate",
         ],
         "//tensorflow:android_arm64": [
             "//tensorflow/lite/delegates/gpu:gl_delegate",
-            "//tensorflow/lite/delegates/xnnpack:xnnpack_delegate",
             "//tensorflow/lite/experimental/delegates/hexagon:hexagon_delegate",
         ],
         "//conditions:default": [],
