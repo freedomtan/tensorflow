@@ -4002,7 +4002,6 @@ TfLiteStatus StatefulNnApiDelegate::DoPrepare(TfLiteContext* context,
       }
     }
   } else {
-    is_accelerator_specified = true;
   }
   // Allocate one element in vector already since TensorFlow Lite uses
   // the first value as the number of nodes. The actual value will be set
