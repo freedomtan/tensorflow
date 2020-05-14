@@ -1928,25 +1928,25 @@ def split(value, num_or_size_splits, axis=0, num=None, name="split"):
 
   See also `tf.unstack`.
 
-  If `num_or_size_splits` is an integer, then `value` is split along the
-  dimension `axis` into `num_split` smaller tensors. This requires that
-  `value.shape[axis]` is divisible by `num_split`.
+  If `num_or_size_splits` is an integer,  then `value` is split along the
+  dimension `axis` into `num_or_size_splits` smaller tensors. This requires that
+  `value.shape[axis]` is divisible by `num_or_size_splits`.
 
-  If `num_or_size_splits` is a 1-D Tensor (or list), we call it `size_splits`
-  and `value` is split into `len(size_splits)` elements. The shape of the `i`-th
+  If `num_or_size_splits` is a 1-D Tensor (or list), then `value` is split into
+  `len(num_or_size_splits)` elements. The shape of the `i`-th
   element has the same size as the `value` except along dimension `axis` where
-  the size is `size_splits[i]`.
+  the size is `num_or_size_splits[i]`.
 
   For example:
 
   >>> x = tf.Variable(tf.random.uniform([5, 30], -1, 1))
-
-  Split `x` into 3 tensors along dimension 1
+  >>>
+  >>> # Split `x` into 3 tensors along dimension 1
   >>> s0, s1, s2 = tf.split(x, num_or_size_splits=3, axis=1)
   >>> tf.shape(s0).numpy()
   array([ 5, 10], dtype=int32)
-
-  Split `x` into 3 tensors with sizes [4, 15, 11] along dimension 1
+  >>>
+  >>> # Split `x` into 3 tensors with sizes [4, 15, 11] along dimension 1
   >>> split0, split1, split2 = tf.split(x, [4, 15, 11], 1)
   >>> tf.shape(split0).numpy()
   array([5, 4], dtype=int32)
@@ -3820,67 +3820,87 @@ def batch_to_space_v2(input, block_shape, crops, name=None):  # pylint: disable=
            block_shape[0] - crops[0,0] - crops[0,1], ..., input_shape[M] *
            block_shape[M-1] - crops[M-1,0] - crops[M-1,1],  input_shape[M+1],
            ..., input_shape[N-1]]
-      Some Examples:
-      (1) For the following input of shape `[4, 1, 1, 1]`,
-         `block_shape = [2, 2]`, and `crops = [[0, 0], [0, 0]]`:
-         ```python
-         [[[[1]]],
-          [[[2]]],
-          [[[3]]],
-          [[[4]]]]
-         ```
-         The output tensor has shape `[1, 2, 2, 1]` and value:
-         ``` x = [[[[1], [2]],
-                   [[3], [4]]]] ```
-      (2) For the following input of shape `[4, 1, 1, 3]`,
-         `block_shape = [2, 2]`, and `crops = [[0, 0], [0, 0]]`:
-         ```python
-         [[[1,  2,   3]],
-          [[4,  5,   6]],
-          [[7,  8,   9]],
-          [[10, 11, 12]]]
-         ```
-         The output tensor has shape `[1, 2, 2, 3]` and value:
-         ```python
-         x = [[[[1, 2, 3], [4,  5,  6 ]],
-               [[7, 8, 9], [10, 11, 12]]]]
-         ```
-      (3) For the following
-         input of shape `[4, 2, 2, 1]`,
-         `block_shape = [2, 2]`, and `crops = [[0, 0], [0, 0]]`:
-         ```python
-         x = [[[[1], [3]], [[ 9], [11]]],
-              [[[2], [4]], [[10], [12]]],
-              [[[5], [7]], [[13], [15]]],
-              [[[6], [8]], [[14], [16]]]]
-         ```
-         The output tensor has shape `[1, 4, 4, 1]` and value:
-         ```python
-         x = [[[1],  [2],  [ 3], [ 4]],
-              [[5],  [6],  [ 7], [ 8]],
-              [[9],  [10], [11], [12]],
-              [[13], [14], [15], [16]]]
-         ```
-       (4) For the following input of shape
-          `[8, 1, 3, 1]`,
-          `block_shape = [2, 2]`, and `crops = [[0, 0], [2, 0]]`:
-          ```python
-          x = [[[[0], [ 1], [ 3]]],
-               [[[0], [ 9], [11]]],
-               [[[0], [ 2], [ 4]]],
-               [[[0], [10], [12]]],
-               [[[0], [ 5], [ 7]]],
-               [[[0], [13], [15]]],
-               [[[0], [ 6], [ 8]]],
-               [[[0], [14], [16]]]]
-          ```
-          The output tensor has shape `[2, 2, 4, 1]` and value:
-          ```python
-          x = [[[[ 1], [ 2], [ 3], [ 4]],
-                [[ 5], [ 6], [ 7], [ 8]]],
-               [[[ 9], [10], [11], [12]],
-                [[13], [14], [15], [16]]]] ```
     name: A name for the operation (optional).
+
+  Examples:
+
+  (1) For the following input of shape `[4, 1, 1, 1]`,
+     `block_shape = [2, 2]`, and `crops = [[0, 0], [0, 0]]`:
+
+     ```python
+     [[[[1]]],
+      [[[2]]],
+      [[[3]]],
+      [[[4]]]]
+     ```
+
+    The output tensor has shape `[1, 2, 2, 1]` and value:
+
+     ```
+     x = [[[[1], [2]],
+         [[3], [4]]]]
+     ```
+
+  (2) For the following input of shape `[4, 1, 1, 3]`,
+     `block_shape = [2, 2]`, and `crops = [[0, 0], [0, 0]]`:
+
+     ```python
+     [[[1,  2,   3]],
+      [[4,  5,   6]],
+      [[7,  8,   9]],
+      [[10, 11, 12]]]
+     ```
+
+    The output tensor has shape `[1, 2, 2, 3]` and value:
+
+    ```python
+     x = [[[[1, 2, 3], [4,  5,  6 ]],
+           [[7, 8, 9], [10, 11, 12]]]]
+     ```
+
+  (3) For the following
+     input of shape `[4, 2, 2, 1]`,
+     `block_shape = [2, 2]`, and `crops = [[0, 0], [0, 0]]`:
+
+     ```python
+     x = [[[[1], [3]], [[ 9], [11]]],
+          [[[2], [4]], [[10], [12]]],
+          [[[5], [7]], [[13], [15]]],
+          [[[6], [8]], [[14], [16]]]]
+     ```
+
+    The output tensor has shape `[1, 4, 4, 1]` and value:
+
+    ```python
+     x = [[[1],  [2],  [ 3], [ 4]],
+          [[5],  [6],  [ 7], [ 8]],
+          [[9],  [10], [11], [12]],
+          [[13], [14], [15], [16]]]
+     ```
+
+   (4) For the following input of shape
+      `[8, 1, 3, 1]`,
+      `block_shape = [2, 2]`, and `crops = [[0, 0], [2, 0]]`:
+
+      ```python
+      x = [[[[0], [ 1], [ 3]]],
+           [[[0], [ 9], [11]]],
+           [[[0], [ 2], [ 4]]],
+           [[[0], [10], [12]]],
+           [[[0], [ 5], [ 7]]],
+           [[[0], [13], [15]]],
+           [[[0], [ 6], [ 8]]],
+           [[[0], [14], [16]]]]
+      ```
+
+      The output tensor has shape `[2, 2, 4, 1]` and value:
+
+      ```python
+      x = [[[[ 1], [ 2], [ 3], [ 4]],
+            [[ 5], [ 6], [ 7], [ 8]]],
+           [[[ 9], [10], [11], [12]],
+            [[13], [14], [15], [16]]]]
+      ```
 
   Returns:
     A `Tensor`. Has the same type as `input`.

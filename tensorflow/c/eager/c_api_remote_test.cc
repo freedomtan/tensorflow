@@ -434,7 +434,23 @@ string AddVariablesFunction() {
   return def.SerializeAsString();
 }
 
-TEST(CAPI, TestFunctionWithPackedInput) {
+void VarIsInitialized(TFE_Context* ctx, TFE_TensorHandle* var_handle) {
+  TF_Status* status = TF_NewStatus();
+  TFE_Op* op = TFE_NewOp(ctx, "VarIsInitializedOp", status);
+  EXPECT_EQ(TF_GetCode(status), TF_OK) << TF_Message(status);
+  TFE_OpAddInput(op, var_handle, status);
+  TFE_TensorHandle* is_initialized[1] = {nullptr};
+  int num_retvals = 1;
+  TFE_Execute(op, &is_initialized[0], &num_retvals, status);
+  CHECK_EQ(1, num_retvals);
+  TF_Tensor* t = TFE_TensorHandleResolve(is_initialized[0], status);
+  bool initialized = false;
+  memcpy(&initialized, TF_TensorData(t), TF_TensorByteSize(t));
+  EXPECT_EQ(initialized, true);
+  delete status;
+}
+
+void TestFunctionWithPackedInput(const bool remote) {
   tensorflow::ServerDef server_def = GetServerDef(3);
 
   // This server def has the task index set to 0.
@@ -474,6 +490,12 @@ TEST(CAPI, TestFunctionWithPackedInput) {
   TFE_TensorHandle* h1 = TestVariable(ctx, 2.0, task1_name);
   TFE_TensorHandle* h2 = TestVariable(ctx, 3.0, task2_name);
 
+  // Add a sync point in order to make sure that variables have been initialized
+  // before the function execution starts.
+  // TODO(b/155789951): Remove once b/155789951 is fixed.
+  VarIsInitialized(ctx, h1);
+  VarIsInitialized(ctx, h2);
+
   // Pack 3 variable handles into one TFE_TensorHandle.
   int num_replicas = 3;
   std::vector<TFE_TensorHandle*> handles = {h0, h1, h2};
@@ -502,6 +524,10 @@ TEST(CAPI, TestFunctionWithPackedInput) {
   ASSERT_EQ(TF_GetCode(status), TF_OK) << TF_Message(status);
   TFE_OpAddInput(func, packed_handle, status);
   ASSERT_EQ(TF_GetCode(status), TF_OK) << TF_Message(status);
+  if (remote) {
+    TFE_OpSetDevice(func, task1_name, status);
+    ASSERT_EQ(TF_GetCode(status), TF_OK) << TF_Message(status);
+  }
 
   TFE_TensorHandle* retvals[1] = {nullptr};
   int num_retvals = 1;
@@ -535,6 +561,14 @@ TEST(CAPI, TestFunctionWithPackedInput) {
   // TODO(b/136478427): Figure out how to correctly shut the server down.
   worker_server1.release();
   worker_server2.release();
+}
+
+TEST(CAPI, TestLocalFunctionWithPackedInput) {
+  TestFunctionWithPackedInput(/*remote=*/false);
+}
+
+TEST(CAPI, TestRemoteFunctionWithPackedInput) {
+  TestFunctionWithPackedInput(/*remote=*/true);
 }
 
 void TestRemoteExecuteDeleteContextWithOutstandingRPC(bool async) {
