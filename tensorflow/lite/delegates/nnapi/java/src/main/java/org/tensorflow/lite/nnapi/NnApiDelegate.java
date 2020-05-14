@@ -152,7 +152,7 @@ public class NnApiDelegate implements Delegate, AutoCloseable {
             /*disallowCpuValue=*/ options.useNnapiCpu != null
                 ? !options.useNnapiCpu.booleanValue()
                 : false,
-           options.allowFp16 != null);
+           options.allowFp16 != null ? options.allowFp16 : false);
   }
 
   public NnApiDelegate() {
