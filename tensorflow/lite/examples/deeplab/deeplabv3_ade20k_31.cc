@@ -82,7 +82,7 @@ int main(int argc, char* argv[]) {
       memcpy(input, bitmap_vector.data(), bitmap_vector.size());
     } break;
     case kTfLiteFloat32: {
-      std::cout << "input size: " << bitmap_vector.size() << "\n";
+      // std::cout << "input size: " << bitmap_vector.size() << "\n";
       auto input = interpreter->typed_tensor<float>(input_tensor_index);
       for (int i = 0; i < bitmap_vector.size(); i++)
         input[i] = bitmap_vector.data()[i] * 1.0;
@@ -112,8 +112,9 @@ int main(int argc, char* argv[]) {
             << "\n";
 #endif
 
-  uint32_t tp_acc = 0, fp_acc = 0, fn_acc = 0;
-  for (int c = 0; c < 32; c++) {
+  std::vector<uint64_t> tp_acc, fp_acc, fn_acc;
+
+  for (int c = 1; c < 32; c++) {
     uint64_t true_positive = 0;
     uint64_t false_positive = 0;
     uint64_t false_negative = 0;
@@ -122,7 +123,8 @@ int main(int argc, char* argv[]) {
       auto g = ground_truth_vector[i];
 
       // 0xff means ignore
-      if (ground_truth_vector[i] != 0xff) {
+      // if ((g != 0xff) && (g != 0)) {
+      if (g != 0xff) {
 	// trichotomy
         if ((p == c) or (g == c)) {
           if (p == g)
@@ -135,14 +137,23 @@ int main(int argc, char* argv[]) {
       }
     }
 
-    tp_acc += true_positive;
-    fp_acc += false_positive;
-    fn_acc += false_negative;
+    tp_acc.push_back(true_positive);
+    fp_acc.push_back(false_positive);
+    fn_acc.push_back(false_negative);
   }
 
   // miou = true_positive / (true_positive + false_positive + false_negative)
+#if 0
   auto miou = tp_acc * 1.0 / (tp_acc + fp_acc + fn_acc);
   std::cout << "mIOU: " << miou << "\n";
+#endif
+
+  for (int i = 0; i < 31; i++) {
+    std::cout << tp_acc[i] << ", " << fp_acc[i] << ", " << fn_acc[i];
+    if (i < 30)
+      std::cout << ", ";
+  }
+  std::cout << "\n";
 
   return 0;
 }
