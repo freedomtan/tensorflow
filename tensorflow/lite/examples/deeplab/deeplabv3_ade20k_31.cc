@@ -98,17 +98,14 @@ void run_model(std::unique_ptr<Interpreter> &interpreter,
       auto p = (uint8_t)0x000000ff & output[i];
       auto g = ground_truth_vector[i];
 
-      // 0xff means ignore
-      // if ((g != 0xff) && (g != 0)) {
-      if (g != 0xff) {
-        // trichotomy
-        if ((p == c) or (g == c)) {
-          if (p == g)
-            true_positive++;
-          else if (p == c)
-            false_positive++;
-          else
-            false_negative++;
+      // trichotomy
+      if ((p == c) or (g == c)) {
+        if (p == g) {
+          true_positive++;
+        } else if (p == c) {
+          if ((g > 0) && (g < 32)) false_positive++;
+        } else {
+          false_negative++;
         }
       }
     }
@@ -189,22 +186,23 @@ int main(int argc, char *argv[]) {
       if (j < 30) std::cout << ", ";
     }
     std::cout << "\n";
+    for (int j = 0; j < 31; j++) {
+      std::cout << "mIOU class " << j + 1 << ": "
+                << tp_acc[j] * 1.0 / (tp_acc[j] + fp_acc[j] + fn_acc[j])
+                << "\n";
+    }
 #endif
   }
 
-  uint64_t tp_sum = 0, fp_sum = 0, fn_sum = 0;
-
+  float iou_sum = 0.0;
   for (int j = 0; j < 31; j++) {
-    std::cout << "mIOU class " << j + 1 << ": "
-              << tp_acc[j] * 1.0 / (tp_acc[j] + fp_acc[j] + fn_acc[j]) << "\n";
+    auto iou = tp_acc[j] * 1.0 / (tp_acc[j] + fp_acc[j] + fn_acc[j]);
 
-    tp_sum += tp_acc[j];
-    fp_sum += fp_acc[j];
-    fn_sum += fn_acc[j];
+    std::cout << "IOU class " << j + 1 << ": " << tp_acc[j] << ", " << fp_acc[j]
+              << ", " << fn_acc[j] << ", " << iou << "\n";
+    iou_sum += iou;
   }
-
-  std::cout << "mIOU over_all: " << tp_sum << ", " << fp_sum << ", " << fn_sum
-            << ", " << tp_sum * 1.0 / (tp_sum + fp_sum + fn_sum) << "\n";
+  std::cout << "mIOU over_all: " << iou_sum / 31 << "\n";
 
   return 0;
 }
