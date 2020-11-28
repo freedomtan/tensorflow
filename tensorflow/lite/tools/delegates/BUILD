@@ -58,6 +58,9 @@ cc_library(
         "//tensorflow:ios": [
             "-xobjective-c++",
         ],
+        "//tensorflow:macos": [
+            "-xobjective-c++",
+        ],
         "//conditions:default": [],
     }),
     deps = [
@@ -70,6 +73,9 @@ cc_library(
         "//conditions:default": [],
     }) + select({
         "//tensorflow:ios": [
+            "//tensorflow/lite/delegates/gpu:metal_delegate",
+        ],
+        "//tensorflow:macos": [
             "//tensorflow/lite/delegates/gpu:metal_delegate",
         ],
         "//conditions:default": [],
@@ -123,6 +129,9 @@ cc_library(
         "//tensorflow/lite/tools/evaluation:utils",
     ] + select({
         "//tensorflow:ios": [
+            "//tensorflow/lite/experimental/delegates/coreml:coreml_delegate",
+        ],
+        "//tensorflow:macos": [
             "//tensorflow/lite/experimental/delegates/coreml:coreml_delegate",
         ],
         "//conditions:default": [],

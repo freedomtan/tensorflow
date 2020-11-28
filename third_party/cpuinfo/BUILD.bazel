@@ -218,7 +218,7 @@ config_setting(
     name = "macos_x86_64",
     values = {
         "apple_platform_type": "macos",
-        "cpu": "darwin",
+        "cpu": "darwin_x86_64",
     },
 )
 
