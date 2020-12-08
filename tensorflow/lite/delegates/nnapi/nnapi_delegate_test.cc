@@ -14,11 +14,11 @@ limitations under the License.
 ==============================================================================*/
 #include "tensorflow/lite/delegates/nnapi/nnapi_delegate.h"
 
+#include <gtest/gtest.h>
 #include <sys/mman.h>
 
 #include <initializer_list>
 
-#include <gtest/gtest.h>
 #include "tensorflow/lite/c/common.h"
 #include "tensorflow/lite/interpreter.h"
 #include "tensorflow/lite/kernels/test_util.h"
@@ -4941,7 +4941,6 @@ TEST(NNAPIDelegate, PReluFloat) {
                                  0.0f, -2.0f, -4.0f,  // Row 1, Column 2
                              }));
 }
-
 TEST(NNAPIDelegate, PReluQuantized) {
   const float kMin = -1;
   const float kMax = 127.f / 128.f;
@@ -5314,6 +5313,58 @@ TEST(QuantizedPadV2OpTest, UInt8AdvancedDynamicValuedTest) {
 }
 TEST(QuantizedPadV2OpTest, Int8AdvancedDynamicValuedTest) {
   AdvancedDynamicValuedTest<int8_t, TensorType_INT8>();
+}
+
+// A base class of Leaky ReLU op model. It provides the constructor for
+// FloatLeakyReluOpModel and QuantizedLeakyReluOpModel.
+class LeakyReluOpModel : public SingleOpModelWithNNAPI {
+ public:
+  LeakyReluOpModel(const TensorData& input, const float& alpha)
+      : input_type_(input.type) {
+    input_ = AddInput(input);
+    // alpha_ = AddInput(alpha);
+    output_ = AddOutput({input.type, input.shape, input.min, input.max});
+
+    SetBuiltinOp(BuiltinOperator_LEAKY_RELU, BuiltinOptions_LeakyReluOptions,
+                 CreateLeakyReluOptions(builder_, alpha).Union());
+    BuildInterpreterWithNNAPI({GetShape(input_)});
+  }
+
+  void SetInput(std::initializer_list<float> data) {
+    SetData(input_, input_type_, data);
+  }
+
+  void SetAlpha(std::initializer_list<float> data) {
+    SetData(alpha_, input_type_, data);
+  }
+
+  std::vector<float> GetOutput() {
+    std::vector<float> output;
+    GetData(output_, input_type_, &output);
+    return output;
+  }
+
+ protected:
+  int input_;
+  int alpha_;
+  int output_;
+
+  const TensorType input_type_;
+};
+
+TEST(NNAPIDelegate, LeakyReluFloat) {
+  LeakyReluOpModel m({TensorType_FLOAT32, {2, 3}}, 0.5f);
+
+  m.SetInput({
+      0.0f, 1.0f, 3.0f,    // Row 1
+      1.0f, -1.0f, -2.0f,  // Row 2
+  });
+  m.Invoke();
+  EXPECT_THAT(m.GetOutput(), ElementsAreArray({
+                                 0.0f, 1.0f, 3.0f,    // Row 1
+                                 1.0f, -0.5f, -1.0f,  // Row 2
+
+                             }));
 }
 
 }  // namespace
