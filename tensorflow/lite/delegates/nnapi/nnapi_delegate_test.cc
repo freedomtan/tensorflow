@@ -5322,7 +5322,6 @@ class LeakyReluOpModel : public SingleOpModelWithNNAPI {
   LeakyReluOpModel(const TensorData& input, const float& alpha)
       : input_type_(input.type) {
     input_ = AddInput(input);
-    // alpha_ = AddInput(alpha);
     output_ = AddOutput({input.type, input.shape, input.min, input.max});
 
     SetBuiltinOp(BuiltinOperator_LEAKY_RELU, BuiltinOptions_LeakyReluOptions,
@@ -5334,10 +5333,6 @@ class LeakyReluOpModel : public SingleOpModelWithNNAPI {
     SetData(input_, input_type_, data);
   }
 
-  void SetAlpha(std::initializer_list<float> data) {
-    SetData(alpha_, input_type_, data);
-  }
-
   std::vector<float> GetOutput() {
     std::vector<float> output;
     GetData(output_, input_type_, &output);
@@ -5346,7 +5341,6 @@ class LeakyReluOpModel : public SingleOpModelWithNNAPI {
 
  protected:
   int input_;
-  int alpha_;
   int output_;
 
   const TensorType input_type_;
@@ -5365,6 +5359,23 @@ TEST(NNAPIDelegate, LeakyReluFloat) {
                                  1.0f, -0.5f, -1.0f,  // Row 2
 
                              }));
+}
+
+TEST(NNAPIDelegate, LeakyReluQuantized) {
+  const float kMin = -1;
+  const float kMax = 127.f / 128.f;
+  LeakyReluOpModel m({TensorType_UINT8, {2, 3}, 8 * kMin, 8 * kMax}, 0.5f);
+  m.SetInput({
+      0.0f, 1.0f, 3.0f,    // Row 1
+      1.0f, -1.0f, -2.0f,  // Row 2
+  });
+  m.Invoke();
+  EXPECT_THAT(m.GetOutput(), ElementsAreArray(ArrayFloatNear(
+                                 {
+                                     0.0f, 1.0f, 3.0f,    // Row 1
+                                     1.0f, -0.5f, -1.0f,  // Row 2
+                                 },
+                                 kQuantizedTolerance)));
 }
 
 }  // namespace
