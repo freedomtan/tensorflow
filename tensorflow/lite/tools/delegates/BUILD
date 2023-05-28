@@ -80,6 +80,9 @@ cc_library(
         "//tensorflow:macos_arm64": [
             "-xobjective-c++",
         ],
+        "//tensorflow:macos_x86_64": [
+            "-xobjective-c++",
+        ],
         "//conditions:default": [],
     }),
     deps = [
@@ -95,6 +98,9 @@ cc_library(
             "//tensorflow/lite/delegates/gpu:metal_delegate",
         ],
         "//tensorflow:macos_arm64": [
+            "//tensorflow/lite/delegates/gpu:metal_delegate",
+        ],
+        "//tensorflow:macos_x86_64": [
             "//tensorflow/lite/delegates/gpu:metal_delegate",
         ],
         "//conditions:default": [],
@@ -143,6 +149,9 @@ cc_library(
         "//tensorflow:macos_arm64": [
             "-xobjective-c++",
         ],
+        "//tensorflow:macos_x86_64": [
+            "-xobjective-c++",
+        ],
         "//conditions:default": [],
     }),
     deps = [
@@ -153,6 +162,9 @@ cc_library(
             "//tensorflow/lite/delegates/coreml:coreml_delegate",
         ],
         "//tensorflow:macos_arm64": [
+            "//tensorflow/lite/delegates/coreml:coreml_delegate",
+        ],
+        "//tensorflow:macos_x86_64": [
             "//tensorflow/lite/delegates/coreml:coreml_delegate",
         ],
         "//conditions:default": [],

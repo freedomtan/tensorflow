@@ -143,6 +143,7 @@ def _tf_repositories():
     # LINT.IfChange
     tf_http_archive(
         name = "XNNPACK",
+        patch_file = ["//third_party:xnnpack.patch"],
         sha256 = "c979b62e8b77af60dfd7567f22ade20d5a9d4d0888f8a2d60d155fc0d31b22ab",
         strip_prefix = "XNNPACK-b9d4073a6913891ce9cbd8965c8d506075d2a45a",
         urls = tf_mirror_urls("https://github.com/google/XNNPACK/archive/b9d4073a6913891ce9cbd8965c8d506075d2a45a.zip"),
@@ -165,6 +166,7 @@ def _tf_repositories():
 
     tf_http_archive(
         name = "cpuinfo",
+        patch_file = ["//third_party:cpuinfo.patch"],
         strip_prefix = "cpuinfo-3dc310302210c1891ffcfb12ae67b11a3ad3a150",
         sha256 = "ba668f9f8ea5b4890309b7db1ed2e152aaaf98af6f9a8a63dbe1b75c04e52cb9",
         urls = tf_mirror_urls("https://github.com/pytorch/cpuinfo/archive/3dc310302210c1891ffcfb12ae67b11a3ad3a150.zip"),

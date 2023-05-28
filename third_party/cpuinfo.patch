@@ -1,0 +1,50 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index 0c92064..a58d259 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -1,6 +1,8 @@
+ # Copied from TensorFlow's `tensorflow/tree/master/third_party/cpuinfo/BUILD
+ # Licenced under Apache-2.0 License
+ 
++load("@bazel_skylib//lib:selects.bzl", "selects")
++
+ # cpuinfo, a library to detect information about the host CPU
+ package(default_visibility = ["//visibility:public"])
+ 
+@@ -240,7 +242,12 @@ config_setting(
+ )
+ 
+ config_setting(
+-    name = "macos_x86_64",
++    name = "windows_x86_64",
++    values = {"cpu": "x64_windows"},
++)
++
++config_setting(
++    name = "macos_x86_64_default",
+     values = {
+         "apple_platform_type": "macos",
+         "cpu": "darwin",
+@@ -248,8 +255,20 @@ config_setting(
+ )
+ 
+ config_setting(
+-    name = "windows_x86_64",
+-    values = {"cpu": "x64_windows"},
++    name = "macos_x86_64_crosscompile",
++    values = {
++        "apple_platform_type": "macos",
++        "cpu": "darwin_x86_64",
++    }
++)
++
++selects.config_setting_group(
++    name = "macos_x86_64",
++    match_any = [
++        ":macos_x86_64_default",
++        ":macos_x86_64_crosscompile",
++    ],
++    visibility = ["//visibility:public"],
+ )
+ 
+ config_setting(

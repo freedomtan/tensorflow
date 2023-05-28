@@ -20,7 +20,7 @@ limitations under the License.
 #if defined(__APPLE__)
 #include "TargetConditionals.h"
 #if (TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR) || \
-    (TARGET_OS_OSX && TARGET_CPU_ARM64)
+    TARGET_OS_OSX
 // Only enable coreml delegate when using a real iPhone device or Apple Silicon.
 #define REAL_IPHONE_DEVICE
 #include "tensorflow/lite/delegates/coreml/coreml_delegate.h"

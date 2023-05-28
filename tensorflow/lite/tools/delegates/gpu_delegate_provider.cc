@@ -22,8 +22,8 @@ limitations under the License.
 #elif defined(__APPLE__)
 #include "TargetConditionals.h"
 #if (TARGET_OS_IPHONE && !TARGET_IPHONE_SIMULATOR) || \
-    (TARGET_OS_OSX && TARGET_CPU_ARM64)
-// Only enable metal delegate when using a real iPhone device or Apple Silicon.
+    TARGET_OS_OSX
+// Only enable metal delegate when using a real iPhone device or macOS.
 #define REAL_IPHONE_DEVICE
 #include "tensorflow/lite/delegates/gpu/metal_delegate.h"
 #endif

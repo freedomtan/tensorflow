@@ -1,0 +1,36 @@
+diff --git a/BUILD.bazel b/BUILD.bazel
+index f49ee0560..450d1caf6 100644
+--- a/BUILD.bazel
++++ b/BUILD.bazel
+@@ -11601,13 +11601,30 @@ config_setting(
+ )
+ 
+ config_setting(
+-    name = "macos_x86_64",
++    name = "macos_x86_64_default",
+     values = {
+         "apple_platform_type": "macos",
+         "cpu": "darwin",
+     },
+ )
+ 
++config_setting(
++    name = "macos_x86_64_crosscompile",
++    values = {
++        "apple_platform_type": "macos",
++        "cpu": "darwin_x86_64",
++    },
++)
++
++selects.config_setting_group(
++    name = "macos_x86_64",
++    match_any = [
++        ":macos_x86_64_default",
++        ":macos_x86_64_crosscompile",
++    ],
++    visibility = ["//visibility:public"],
++)
++
+ config_setting(
+     name = "macos_arm64",
+     values = {

@@ -191,6 +191,9 @@ build:android --dynamic_mode=off
 # Sets the default Apple platform to macOS.
 build:macos --apple_platform_type=macos
 
+# set cpu to darwin_x86_64
+build:macos --cpu=darwin_x86_64
+
 # gRPC on MacOS requires this #define
 build:macos --copt=-DGRPC_BAZEL_BUILD
 
